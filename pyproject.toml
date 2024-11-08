@@ -10,10 +10,12 @@ dynamic = ["version"]
 name = "finchnmr"
 description="My Awesome New Package"
 authors = [
-    {name = "Nathan A. Mahynski", email = "nathan.mahynski@gmail.com"}
+    {name = "Nathan A. Mahynski", email = "nathan.mahynski@gmail.com"},
+    {name = "David A. Sheen", email = "david.sheen@nist.gov"}
 ]
 maintainers = [
-    {name = "Nathan A. Mahynski", email = "nathan.mahynski@gmail.com"}
+    {name = "Nathan A. Mahynski", email = "nathan.mahynski@gmail.com"},
+    {name = "David A. Sheen", email = "david.sheen@nist.gov"}
 ]
 keywords = []
 classifiers = [
