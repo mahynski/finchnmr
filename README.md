@@ -6,9 +6,6 @@ FINCHnmr : [FI]tti[N]g [C]13 [H]1 HSQC [NMR]
 FINCHnmr is lightweight toolkit for fitting 2D HSQC (H1, C13) NMR data to a known library of substances.  This predicts the presence and relative concentration of these compounds, and the residual (error) can be interpreted as the sum of the remaining unknown compounds present.
 
 <br/>
-<br/>
-<br/>
-<br/>
 
 Installation
 ===
