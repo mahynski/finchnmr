@@ -13,5 +13,8 @@ class Substance:
   uc0_scale: NDArray
   uc1_scale: NDArray
 
-def __init__(self):
+  def __init__(self):
+    return
+
+def resample(substance: 'Substance') -> 'Substance':
   return
