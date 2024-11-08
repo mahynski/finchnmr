@@ -1,0 +1,55 @@
+---
+fail_fast: false
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.3.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-ast
+    -   id: check-docstring-first
+    -   id: check-merge-conflict
+    -   id: check-symlinks
+    -   id: check-yaml
+    -   id: debug-statements
+    -   id: requirements-txt-fixer
+
+      #-   repo: https://github.com/pycqa/isort
+      #    rev: 5.11.5
+      #    hooks:
+      #    -   id: isort
+      #        args: ["--profile", "black", "--filter-files"]
+      #        language: python
+      #        types: [python]
+-   repo: https://github.com/psf/black
+    rev: 22.8.0
+    hooks:
+    -   id: black
+        args: ["--line-length", "80"]
+        language: python
+        types: [python]
+-   repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.9.0
+    hooks:
+    -   id: python-use-type-annotations
+-   repo: https://github.com/adrienverge/yamllint
+    rev: v1.28.0
+    hooks:
+    -   id: yamllint
+        args: ["-d", "{ignore: .pre-commit-config.yaml}"]
+        language: python
+        types: [yaml]
+-   repo: https://github.com/pycqa/pydocstyle
+    rev: 6.1.1
+    hooks:
+    -   id: pydocstyle
+        language: python
+        types: [python]
+-   repo: https://github.com/asottile/blacken-docs
+    rev: v1.12.1
+    hooks:
+    -   id: blacken-docs
+        language: python
+        types: [python]
+        additional_dependencies: [black==20.8b1]

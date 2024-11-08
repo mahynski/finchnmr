@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "Please cite this repository as indicated below."
+authors:
+  - family-names: Mahynski
+    given-names: Nathan
+    orcid: https://orcid.org/0000-0002-0008-8749
+title: "my_package"
+version: v0.0.0
+doi: 10.1234/zenodo.12345678
+date-released: YYYY-MM-DD
