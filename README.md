@@ -58,6 +58,12 @@ Best Practices
 
 Other best practices include [typing](https://docs.python.org/3/library/typing.html) - see [mypy](https://mypy-lang.org/).
 
+Notes
+===
+
+Look at [LASSO CV](https://scikit-learn.org/1.5/modules/generated/sklearn.linear_model.LassoCV.html)
+See [sparse-lm](https://cedergrouphub.github.io/sparse-lm/) as an alternative to LASSO
+
 ~~~bash
 $ mypy --ignore-missing-imports my_new_file.py
 ~~~
