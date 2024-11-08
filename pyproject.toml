@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 [project]
 dynamic = ["version"]
 # version = "0.0.0"
-name = "my_package"
+name = "finchnmr"
 description="My Awesome New Package"
 authors = [
     {name = "Nathan A. Mahynski", email = "nathan.mahynski@gmail.com"}
@@ -52,12 +52,12 @@ testpaths = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["my_package*"]
+include = ["finchnmr*"]
 
 [tool.setuptools.dynamic]
-version = {attr = "my_package.__version__"}
+version = {attr = "finchnmr.__version__"}
 
 [project.urls]
-Repository = "https://github.com/mahynski/my_package.git"
-Documentation = "https://my_package.readthedocs.io/"
-Issues = "https://github.com/mahynski/my_package/issues"
+Repository = "https://github.com/mahynski/finchnmr.git"
+Documentation = "https://finchnmr.readthedocs.io/"
+Issues = "https://github.com/mahynski/finchnmr/issues"
