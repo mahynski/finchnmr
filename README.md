@@ -1,3 +1,14 @@
+FINCH
+===
+
+<img src="docs/_static/logo_small.png" height="100" align="left" />
+
+<br/>
+<br/>
+<br/>
+<br/>
+
+
 PyPi Package Template
 ===
 
