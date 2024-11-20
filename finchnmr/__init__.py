@@ -1,9 +1,10 @@
 """
-author: Nathan A. Mahynski
-
+Author: Nathan A. Mahynski
 """
 __version__ = "0.0.0"
 
 __all__ = [
-  "library",
+  "models",
+  "utils",
+  "xml_parser"
 ]
