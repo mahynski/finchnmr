@@ -15,9 +15,13 @@ FINCHnmr : [FI]tti[N]g [C]13 [H]1 HSQC [NMR]
 
 <img src="docs/_static/logo_small.png" height="100" align="left" />
 
-FINCHnmr is lightweight toolkit for fitting 2D HSQC NMR data to a known library of substances.  This predicts the presence and relative concentration of these compounds, and the residual (error) can be interpreted as the sum of the remaining unknown compounds present.  For a live demonstration, visit [https://finchnmr-demo.streamlit.app/](https://finchnmr-demo.streamlit.app/).
-Although originally designed to work with (H1-C13) data, FINCHnmr will work with any 2D NMR as long as the library used matches the sample being predicted / analyzed.
+FINCHnmr is lightweight toolkit for fitting 2D heteronuclear single-quantum coherence (HSQC) nuclear magnetic resonance (NMR) data to a known library of substances.  This predicts the presence and relative concentration of these compounds, and the residual (error) can be interpreted as the sum of the remaining unknown compounds present.  For a live demonstration, visit [https://finchnmr-demo.streamlit.app/](https://finchnmr-demo.streamlit.app/). Although originally designed to work with (H1-C13) data, FINCHnmr will work with any 2D NMR as long as the library used matches the sample being predicted / analyzed.
 <br/>
+
+There are two approaches to generating the spectral libraries:
+
+1. Library spectra are taken directly from the Biological Magnetic Resonance Bank (BMRB). These spectra must be resampled so that they match the extent and resolution of the wild spectra being fit.
+2. Library spectra are reconstructed from a feature list, which requires assumptions about the extent of those features in the frequency shift space.
 
 Installation
 ===
