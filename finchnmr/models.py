@@ -12,7 +12,40 @@ import numpy as np
 from typing import Union, Any, Sequence
 from numpy.typing import NDArray
 
-class LASSO:
+class _Model:
+    """
+    Model base class wrapper for linear models.
+    
+    The main reason this is needed is to define a consistent interface to a method to access the model coefficients after fitting.
+    """
+    def __init__(self, *args, **kwargs):
+        self.model_ = None
+        return self
+        
+    def fit(self, X, y):
+        if self.model_ is None:
+            raise Exception("model has not been set yet.")
+        return self.model_.fit(X, y)
+        
+    def score(self, X, y):
+        if self.model_ is None:
+            raise Exception("model has not been set yet.")
+        return self.model_.score(X, y)
+        
+    @staticmethod
+    def coeff(self):
+        raise NotImplementedError
+        
+class LASSO(_Model):
+    def __init__(self, )
+        self.model_ = sklm.Lasso( ...
+        return self
+        
+    @staticmethod
+    def coeff(self):
+        return self.model_.coef_
+    
+class Utils: # not needed anymore
     """Fit LASSO model(s) from the scikit-learn library."""
 
     @staticmethod
