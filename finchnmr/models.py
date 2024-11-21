@@ -9,41 +9,48 @@ import utils
 import sklearn.linear_model as sklm
 import numpy as np
 
+from sklearn.base import BaseEstimator, RegressorMixin
+
 from typing import Union, Any, Sequence
 from numpy.typing import NDArray
 
-class _Model:
+class _Model(RegressorMixin, BaseEstimator);
     """
     Model base class wrapper for linear models.
     
     The main reason this is needed is to define a consistent interface to a method to access the model coefficients after fitting.
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
+        """
+        Note that the sklearn API requires all estimators (subclasses of this) to specify all the parameters that can be set at the class level in their __init__ as explicit keyword arguments (no *args or **kwargs).
+        """
         self.model_ = None
-        return self
         
     def fit(self, X, y):
         if self.model_ is None:
             raise Exception("model has not been set yet.")
-        return self.model_.fit(X, y)
+        else:
+            self.__model = self.model_(**self.get_params())
+        _ = self.__model.fit(X, y)
+        self.is_fitted_ = True
+        return self
         
-    def score(self, X, y):
-        if self.model_ is None:
-            raise Exception("model has not been set yet.")
-        return self.model_.score(X, y)
+    def predict(self, X):
+        return self.__model.predict(X)
         
-    @staticmethod
+    def model(self):
+        return self.__model
+
     def coeff(self):
         raise NotImplementedError
         
 class LASSO(_Model):
-    def __init__(self, )
-        self.model_ = sklm.Lasso( ...
-        return self
+    def __init__(self, alpha=1.0, *, fit_intercept=True, precompute=False, copy_X=True, max_iter=1000, tol=0.0001, warm_start=False, positive=False, random_state=None, selection='cyclic'):
+        self.set_params()
+        self.model_ = sklm.Lasso
         
-    @staticmethod
     def coeff(self):
-        return self.model_.coef_
+        return self.model().coef_
     
 class Utils: # not needed anymore
     """Fit LASSO model(s) from the scikit-learn library."""
