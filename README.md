@@ -20,7 +20,7 @@ FINCHnmr is lightweight toolkit for fitting 2D [heteronuclear single-quantum coh
 
 There are two approaches to generating the spectral libraries.  Both methods are demonstrated in the documentation.
 
-1. Library spectra are taken directly from the [Biological Magnetic Resonance Bank (BMRB)](https://bmrb.io/). These spectra must be resampled so that they match the extent and resolution of the wild spectra being fit.
+1. Library spectra are taken directly from the [Biological Magnetic Resonance Bank (BMRB)](https://bmrb.io/). These spectra must be resampled so that they match the extent (2D grid) and resolution of the wild spectra being fit.
 2. Library spectra are reconstructed from a feature list, which requires assumptions about the extent of those features in the frequency shift space.
 
 Installation
