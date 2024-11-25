@@ -65,6 +65,10 @@ class Substance:
         """Return the interpolation function."""
         return self._interp_fcn
     
+    def flatten(self):
+        """Return a flattened (1D) version of the data."""
+        return self._data.flatten()
+    
     @staticmethod
     def bin_spectrum(
         spec_to_bin: NDArray[np.floating], 
@@ -176,7 +180,7 @@ class Substance:
     def from_xml(self, filename):
         raise NotImplementedError
     
-    def fit(self, reference: "Substance") -> "Substance":
+    def fit(self, reference: Substance) -> Substance:
         """
         Align this substance to another one which serves as a reference.
         
@@ -210,7 +214,7 @@ class Substance:
         
         return aligned
     
-    def _crop_and_pad(self, reference: "Substance") -> tuple[NDArray[np.floating], NDArray[np.floating], NDArray[np.floating]]:
+    def _crop_and_pad(self, reference: Substance) -> tuple[NDArray[np.floating], NDArray[np.floating], NDArray[np.floating]]:
         """
         Crop and/or pad the 2D HSQC NMR spectrum to be aligned with the reference HSQC NMR spectrum.
 
@@ -299,7 +303,7 @@ class Substance:
         norm: Union[str, None] = None,
         ax: Union[matplotlib.pyplot.Axes, None] = None,
         cmap='RdBu'
-    ) -> tuple["matplotlib.image.AxesImage", "matplotlib.pyplot.colorbar"]:
+    ) -> tuple[matplotlib.image.AxesImage, matplotlib.pyplot.colorbar]:
         """
         Plot a single HSQC NMR spectrum.
 

@@ -5,81 +5,76 @@ Authors: Nathan A. Mahynski
 """
 import pickle
 
-import sklearn.linear_model as sklm
+import matplotlib.pyplot as plt
 import numpy as np
+import sklearn.linear_model as sklm
 
+from . import library
+from . import substance
 from . import utils
+
 from sklearn.base import BaseEstimator, RegressorMixin
 from itertools import product
 from typing import Union, Any, Sequence, ClassVar
 from numpy.typing import NDArray
 
 def optimize_models(
-    target_spectra: list[NDArray[np.floating]], 
-    library_spectra: NDArray[np.floating], 
+    targets: list[substance.Substance], 
+    library: library.Library, 
     model: "_Model",
     param_grid: dict[str, list],
     model_kw: Union[dict[str, Any], None] = None, 
-    binning_kw: Union[dict, None] = None
-) -> tuple[list, list]:
+) -> list:
     """
     Optimize a model to fit each wild spectra in a list.
 
     Parameters
     ----------
-    target_spectra : list(ndarray(float, ndim=1))
-        List of flattened HSQC NMR spectra to fit.
-
-    library_spectra : ndarray(float, ndim=2)
-        Flattened HSQC NMR spectra of a library of known compounds to fit against.  Coefficients will follow the order of spectra provided here.
-
+    targets : list[Substance]
+        Unknown/wild HSQC NMR spectrum to fit with the library.
+        
+    library : Library
+        Library of HSQC NMR spectra to use for fitting `targets`.
+        
     model : _Model
         Uninstantiated model class to fit the spectra with.
-
+        
     param_grid : dict(str, list)
         Dictionary of parameter grid to search over; this follows the same convention as `sklearn.model_selection.GridSearchCV`.
 
     model_kw : dict(str, Any), optional(default=None)
-        Default keyword arguments to your model.
-
-    binning_kw : dict, optional(default=None)
-        Keyword arguments to `utils.bin_spectrum`.
+        Default keyword arguments to your model. If `None` then the `model` defaults are used.
 
     Returns
     -------
     models_list : list(_Model)
         List of optimized models fit to each target HSQC NMR spectrum.
 
-    spectra_list : list(ndarray(float, ndim=1))
-        List of HSQC NMR spectra fit during training (coarsened versions of `target_spectra`).
-
     Example
     -------
     >>> models_list, spectra_list = finchnmr.models.optimize_models(
-    ...     target_spectra=target_spectra,
-    ...     library_spectra=library_spectra,
+    ...     targets=[target],
+    ...     library=library,
     ...     model=finchnmr.models.LASSO,
     ...     param_grid={'alpha': np.logspace(-5, 1, 100)},
     ... )
     """
-    models_list = []
-    spectra_list = []
-        
-    if binning_kw is None:
-        binning_kw = {}
+    optimized_models = []
 
-    def build_fitted_model_(model_kw, param_set, library_spectra, data_to_fit):
+    def build_fitted_model_(model_kw, param_set, library, target):
+        """Create and train the model."""
         if model_kw is None:
             estimator = model() # Use model default parameters
         else:
             estimator = model(**model_kw) # Set basic parameters manually
 
         estimator.set_params(param_set) # Set specific parameters (alpha, etc.)
-        _ = estimator.fit(library_spectra.T, data_to_fit.T)
+        _ = estimator.fit(library.X, target.flatten())
 
         return estimator
 
     def unroll_(param_grid):
+        """Create every possible combination of parameters in the grid."""
         param_sets = []
         for values in product(*param_grid.values()):
             combination = dict(zip(param_grid.keys(), values))
@@ -87,26 +82,24 @@ def optimize_models(
 
         return param_sets
 
-    for target_spectrum in target_spectra:
-        binned_spectrum = utils.bin_spectrum(target_spectrum, **binning_kw)
-        data_to_fit = binned_spectrum.reshape(1,-1)
+    param_sets = unroll_(param_grid)
+    for target in targets:
+        library.fit(target) # Align library with target
 
-        param_sets = unroll_(param_grid)
         scores = []
-        for param_set_ in param_sets:
-            estimator_ = build_fitted_model_(model_kw, param_set_, library_spectra, data_to_fit)
-            scores.append(estimator_.score(library_spectra.T, data_to_fit.T))
+        for param_set in param_sets:
+            estimator_ = build_fitted_model_(model_kw, param_set, library, target)
+            scores.append(estimator_.score(library.X, target.flatten()))
 
         # Fit final estimator with the "best" parameters
-        estimator = build_fitted_model_(model_kw, param_sets[np.argmax(scores)], library_spectra, data_to_fit)
+        estimator = build_fitted_model_(model_kw, param_sets[np.argmax(scores)], library, target)
 
-        models_list += [estimator]
-        spectra_list += [binned_spectrum]
+        optimized_models += [estimator]
 
-    return models_list, spectra_list
+    return optimized_models
 
 def plot_coeffs(
-    models_list: list[Any],
+    optimized_models: list[Any],
     norm: Union[str, None] = None,
     **kwargs : Any,
 ) -> None:
@@ -115,13 +108,13 @@ def plot_coeffs(
 
     Parameters
     ----------
-    models_list : list
+    optimized_models : list
         List of fitted models (see `optimize_models`).
         
     norm : str, optional(default=None)
         The normalization method used to scale data to the [0, 1] range before mapping to colors.
     """
-    coefs_list = [m.coeff() for m in models_list]
+    coefs_list = [m.coeff() for m in optimized_models]
     coefs_array = np.stack(coefs_list)
     plt.imshow(coefs_array.T, norm=norm, **kwargs)
     plt.colorbar()
@@ -133,6 +126,7 @@ class _Model(RegressorMixin, BaseEstimator):
     The main reason this is needed is to define a consistent interface to a method to access the model coefficients after fitting.
     """
     model: ClassVar[Any]
+    model_: ClassVar[Any]
         
     def __init__(self) -> None:
         """
@@ -140,7 +134,7 @@ class _Model(RegressorMixin, BaseEstimator):
 
         Note that the sklearn API requires all estimators (subclasses of this) to specify all the parameters that can be set at the class level in their __init__ as explicit keyword arguments (no *args or **kwargs).
         """
-        self.model_ = None
+        setattr(self, "model_", None)
         
     def set_params(self, **parameters: Any) -> "_Model":
         """Set parameters; for consistency with scikit-learn's estimator API."""
@@ -168,10 +162,10 @@ class _Model(RegressorMixin, BaseEstimator):
         if self.model_ is None:
             raise Exception("model has not been set yet.")
         else:
-            self.model = self.model_(**self.get_params())
+            setattr(self, "model", self.model_(**self.get_params()))
 
         _ = self.model.fit(X, y)
-        self.is_fitted_ = True
+        setattr(self, "is_fitted_ ", True)
 
         return self
         
@@ -234,7 +228,7 @@ class LASSO(_Model):
             'random_state': random_state, 
             'selection': selection
         })
-        self.model_ = sklm.Lasso
+        setattr(self, "model_", sklm.Lasso)
         
     def coeff(self) -> NDArray[np.floating]:
         """Return the LASSO model coefficients."""
