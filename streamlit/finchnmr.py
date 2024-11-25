@@ -1,7 +1,7 @@
 """
 Interactive demonstration of FINCHnmr.
-Author: Nathan A. Mahynski
 
+Author: Nathan A. Mahynski
 """
 import streamlit as st
 

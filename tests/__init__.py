@@ -1,6 +1,5 @@
 """
-Unittests
-author: Nathan A. Mahynski
+Unittests for FINCHnmr.
 
+Author: Nathan A. Mahynski
 """
-

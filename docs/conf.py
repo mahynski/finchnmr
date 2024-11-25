@@ -45,4 +45,4 @@ nbsphinx_execute = "never"  # Always pre-run notebooks and save their output - j
 # nbsphinx_thumbnails = {
 #    "jupyter/api/pipelines": "_static/default.png",
 #    "jupyter/api/sharing_models": "_static/default.png",
-#}
+# }

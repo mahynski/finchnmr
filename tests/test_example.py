@@ -1,16 +1,17 @@
 """
 Unittests template example.
-author: Nathan A. Mahynski
 
+Author: Nathan A. Mahynski
 """
 import unittest
 
-from finchnmr import * # Bad form, but just a placeholder example
+from finchnmr import *  # Bad form, but just a placeholder example
+
 
 class DummyTest(unittest.TestCase):
     """Perform dummy tests."""
-  
-    @classmethod  
+
+    @classmethod
     def setUpClass(self):
         """Set up things for all members of this test class."""
         return
