@@ -4,6 +4,8 @@ Tools to build models.
 Authors: Nathan A. Mahynski
 """
 import pickle
+import tqdm
+import copy
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,7 +13,6 @@ import sklearn.linear_model as sklm
 
 from . import library
 from . import substance
-from . import utils
 
 from sklearn.base import BaseEstimator, RegressorMixin
 from itertools import product
@@ -20,9 +21,9 @@ from numpy.typing import NDArray
 
 
 def optimize_models(
-    targets: list[substance.Substance],
-    library: library.Library,
-    model: "_Model",
+    targets: list["substance.Substance"],
+    nmr_library: "library.Library",
+    nmr_model: "_Model",
     param_grid: dict[str, list],
     model_kw: Union[dict[str, Any], None] = None,
 ) -> list:
@@ -32,45 +33,47 @@ def optimize_models(
     Parameters
     ----------
     targets : list[Substance]
-        Unknown/wild HSQC NMR spectrum to fit with the library.
+        Unknown/wild HSQC NMR spectrum to fit with the `nmr_library`.
 
-    library : Library
+    nmr_library : Library
         Library of HSQC NMR spectra to use for fitting `targets`.
 
-    model : _Model
+    nmr_model : _Model
         Uninstantiated model class to fit the spectra with.
 
     param_grid : dict(str, list)
         Dictionary of parameter grid to search over; this follows the same convention as `sklearn.model_selection.GridSearchCV`.
 
     model_kw : dict(str, Any), optional(default=None)
-        Default keyword arguments to your model. If `None` then the `model` defaults are used.
+        Default keyword arguments to your model. If `None` then the `nmr_model` defaults are used.
 
     Returns
     -------
-    models_list : list(_Model)
+    optimized_models : list(_Model)
         List of optimized models fit to each target HSQC NMR spectrum.
 
     Example
     -------
-    >>> models_list, spectra_list = finchnmr.models.optimize_models(
+    >>> optimized_models = finchnmr.model.optimize_models(
     ...     targets=[target],
-    ...     library=library,
-    ...     model=finchnmr.models.LASSO,
+    ...     nmr_library=nmr_library,
+    ...     nmr_model=finchnmr.model.LASSO,
     ...     param_grid={'alpha': np.logspace(-5, 1, 100)},
     ... )
     """
     optimized_models = []
 
-    def build_fitted_model_(model_kw, param_set, library, target):
+    def build_fitted_model_(model_kw, param_set, nmr_library, target):
         """Create and train the model."""
         if model_kw is None:
-            estimator = model()  # Use model default parameters
+            estimator = nmr_model()  # Use model default parameters
         else:
-            estimator = model(**model_kw)  # Set basic parameters manually
+            estimator = nmr_model(**model_kw)  # Set basic parameters manually
 
-        estimator.set_params(param_set)  # Set specific parameters (alpha, etc.)
-        _ = estimator.fit(library.X, target.flatten())
+        estimator.set_params(
+            **param_set
+        )  # Set specific parameters (alpha, etc.)
+        _ = estimator.fit(nmr_library, target)
 
         return estimator
 
@@ -84,19 +87,29 @@ def optimize_models(
         return param_sets
 
     param_sets = unroll_(param_grid)
-    for target in targets:
-        library.fit(target)  # Align library with target
+    for i, target in tqdm.tqdm(
+        enumerate(targets), desc="Iterating through targets"
+    ):
 
         scores = []
-        for param_set in param_sets:
-            estimator_ = build_fitted_model_(
-                model_kw, param_set, library, target
-            )
-            scores.append(estimator_.score(library.X, target.flatten()))
+        for param_set in tqdm.tqdm(
+            param_sets, desc="Iterating through parameter sets"
+        ):
+            try:
+                estimator_ = build_fitted_model_(
+                    model_kw, param_set, nmr_library, target
+                )
+            except:
+                pass  # Do not score this model
+            else:
+                scores.append(estimator_.score())
+
+        if len(scores) == 0:
+            raise Exception(f"Unable to fit any models for target index {i}")
 
         # Fit final estimator with the "best" parameters
         estimator = build_fitted_model_(
-            model_kw, param_sets[np.argmax(scores)], library, target
+            model_kw, param_sets[np.argmax(scores)], nmr_library, target
         )
 
         optimized_models += [estimator]
@@ -127,14 +140,11 @@ def plot_coeffs(
 
 
 class _Model(RegressorMixin, BaseEstimator):
-    """
-    Model base class wrapper for linear models.
-
-    The main reason this is needed is to define a consistent interface to a method to access the model coefficients after fitting.
-    """
+    """Model base class wrapper for linear models."""
 
     model: ClassVar[Any]
     model_: ClassVar[Any]
+    _nmr_library: ClassVar["library.Library"]
 
     def __init__(self) -> None:
         """
@@ -150,17 +160,21 @@ class _Model(RegressorMixin, BaseEstimator):
             setattr(self, parameter, value)
         return self
 
-    def fit(self, X: NDArray[np.floating], y: NDArray[np.floating]) -> "_Model":
+    def fit(
+        self, nmr_library: "library.Library", target: "substance.Substance"
+    ) -> "_Model":
         """
         Fit the model.
 
+        The library is "fit"/aligned to the target first, then the linear model is fit.
+
         Parameters
         ----------
-        X : ndarray(float, ndim=1)
-            Flattened library HSQC NMR spectra.
+        nmr_library : Library
+            Library of HSQC NMR spectra to use for fitting `unknown`.
 
-        y : ndarray(float, ndim=1)
-            Flattened target HSQC NMR spectra to fit.
+        target : substance.Substance
+            Unknown/wild HSQC NMR spectrum to fit with the `nmr_library`.
 
         Returns
         -------
@@ -171,27 +185,57 @@ class _Model(RegressorMixin, BaseEstimator):
             raise Exception("model has not been set yet.")
         else:
             setattr(self, "model", self.model_(**self.get_params()))
+            setattr(self, "_nmr_library", copy.deepcopy(nmr_library))
+            
+        # Align library with target
+        self._nmr_library.fit(target)
+        
+        # Target needs to take absolute value and optionally be scaled in [0, 1]; same as when library is aligned.
+        
+        # ...
+        
+        
+        # When predicting / reconstructing, scale the model output back to "real" units
+        
+        
 
-        _ = self.model.fit(X, y)
+        _ = self.model.fit(
+            self._nmr_library.X, self._nmr_library._fit_to.flatten()
+        )
         setattr(self, "is_fitted_ ", True)
 
         return self
 
-    def predict(self, X: NDArray[np.floating]) -> NDArray[np.floating]:
+    def predict(self) -> NDArray[np.floating]:
         """
         Predict the (flattened) target HSQC spectra.
-
-        Parameters
-        ----------
-        X : ndarray(float, ndim=1)
-            Flattened library HSQC NMR spectra.
 
         Returns
         -------
         spectrum : ndarray(float, ndim=1)
-            Predicted spectrum fit to the given library.
+            Predicted (flattened) spectrum fit to the given `nmr_library`.
         """
-        return self.model.predict(X)
+        return self.model.predict(self._nmr_library.X)
+
+    def score(self) -> float:
+        """
+        Score the model's performance (fit).
+
+        Returns
+        -------
+        score : float
+            Coefficient of determination of the model that uses `nmr_library` to predict `target`.
+        """
+        return self.model.score(
+            self._nmr_library.X, self._nmr_library._fit_to.flatten()
+        )
+
+    def reconstruct(self) -> "substance.Substance":
+        """Reconstruct a 2D HSQC NMR spectrum using the fitted model."""
+        reconstructed = copy.deepcopy(self._nmr_library._fit_to)
+        reconstructed._set_data(reconstructed.unflatten(self.predict()))
+
+        return reconstructed
 
     def coeff(self) -> NDArray[np.floating]:
         """Return the coefficients in the model."""

@@ -16,12 +16,12 @@ from typing import ClassVar
 class Library:
     """Library of substances for fitting new unknowns."""
 
-    substances: ClassVar[list[substance.Substance]]
+    substances: ClassVar[list["substance.Substance"]]
     is_fitted_: ClassVar[bool]
-    _fit_to: substance.Substance
+    _fit_to: "substance.Substance"
     _X: ClassVar[NDArray[np.floating]]
 
-    def __init__(self, substances: list[substance.Substance]) -> None:
+    def __init__(self, substances: list["substance.Substance"]) -> None:
         """
         Instantiate the library.
 
@@ -49,7 +49,7 @@ class Library:
         setattr(self, "substances", substances)
         setattr(self, "is_fitted_", False)
 
-    def fit(self, reference: substance.Substance) -> Library:
+    def fit(self, reference: "substance.Substance") -> "Library":
         """
         Align all substances to another one which serves as a reference.
 
@@ -64,10 +64,13 @@ class Library:
         """
         aligned = []
         for sub in self.substances:
-            aligned.append(sub.fit(reference).flatten())
-        setattr(self, "_X", np.array(aligned, dtype=np.float64))
+            aligned.append(sub.fit(reference).flatten()) # Intensities become absolute values
+        setattr(self, "_X", np.array(aligned, dtype=np.float64).T)
         setattr(self, "_fit_to", reference)
         setattr(self, "is_fitted_", True)
+        
+        # Normalize each spectra by its maximum intensity - after absolute value, now in [0, 1]
+        setattr(self, "_X", self._X / self._X.max(axis=0))
 
         return self
 
@@ -79,7 +82,7 @@ class Library:
         Returns
         -------
         X : ndarray(float, ndim=2)
-            This data is arranged in a 2D array, where each row is the flattened HSQC NMR spectrum of a different substance. The ordering follows that with which the library was instantiated.
+            This data is arranged in a 2D array, where each COLUMN is the flattened HSQC NMR spectrum of a different substance (row). The ordering follows that with which the library was instantiated.
 
         Example
         -------

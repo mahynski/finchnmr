@@ -17,6 +17,11 @@ import scipy.interpolate as spint
 from numpy.typing import NDArray
 from typing import Any, Union, ClassVar
 
+# Turn warnings from bruker.guess_udic into errors
+import warnings
+
+warnings.filterwarnings("error")
+
 
 class Substance:
     """Substance that was measured with HSQC NMR."""
@@ -51,28 +56,38 @@ class Substance:
             self.read(pathname=pathname, style=style)
 
     @property
-    def data(self):
+    def data(self) -> NDArray[np.floating]:
         """Return the 2D HSQC NMR spectrum."""
         return copy.deepcopy(self._data)
 
     @property
-    def extent(self):
+    def extent(self) -> list:
         """Return the bounds of the spectrum."""
         return copy.deepcopy(self._extent)
 
     @property
-    def scale(self):
+    def scale(self) -> tuple:
         """Return the grid points the spectrum is reported on."""
         return (self._uc0_scale, self._uc1_scale)
 
     @property
-    def interp_fcn(self):
+    def interp_fcn(self) -> Any:
         """Return the interpolation function."""
         return self._interp_fcn
 
-    def flatten(self):
+    def flatten(self) -> NDArray[np.floating]:
         """Return a flattened (1D) version of the data."""
         return self._data.flatten()
+
+    def unflatten(self, data: NDArray[np.floating]) -> NDArray[np.floating]:
+        """Unflatten or reshape data back to the original 2D shape."""
+        if data.ndim > 1:
+            raise Exception("Data to unflatten should be one dimensional.")
+        return data.reshape(self._data.shape)
+
+    def _set_data(self, data: NDArray[np.floating]) -> None:
+        """Manually assign data; used only under very special circumstances."""
+        setattr(self, "_data", copy.deepcopy(data))
 
     @staticmethod
     def bin_spectrum(
@@ -120,7 +135,7 @@ class Substance:
 
         return cnv
 
-    def read(self, pathname, style="bruker"):
+    def read(self, pathname: str, style: str = "bruker") -> None:
         """
         Read HSQC NMR spectrum from a directory created by the instrument.
 
@@ -211,13 +226,15 @@ class Substance:
 
         return
 
-    def from_xml(self, filename):
+    def from_xml(self, filename: str) -> None:
         """Read substance from XML peak list."""
         raise NotImplementedError
 
-    def fit(self, reference: Substance) -> Substance:
+    def fit(self, reference: "Substance") -> "Substance":
         """
         Align this substance to another one which serves as a reference.
+        
+        This also transforms the intensities to absolute values.
 
         Parameters
         ----------
@@ -259,7 +276,7 @@ class Substance:
         return aligned
 
     def _crop_and_pad(
-        self, reference: Substance
+        self, reference: "Substance"
     ) -> tuple[
         NDArray[np.floating], NDArray[np.floating], NDArray[np.floating]
     ]:
@@ -360,9 +377,9 @@ class Substance:
     def plot(
         self,
         norm: Union[str, None] = None,
-        ax: Union[matplotlib.pyplot.Axes, None] = None,
+        ax: Union["matplotlib.pyplot.Axes", None] = None,
         cmap="RdBu",
-    ) -> tuple[matplotlib.image.AxesImage, matplotlib.pyplot.colorbar]:
+    ) -> tuple["matplotlib.image.AxesImage", "matplotlib.pyplot.colorbar"]:
         """
         Plot a single HSQC NMR spectrum.
 
