@@ -18,12 +18,13 @@ from itertools import product
 from typing import Union, Any, Sequence, ClassVar
 from numpy.typing import NDArray
 
+
 def optimize_models(
-    targets: list[substance.Substance], 
-    library: library.Library, 
+    targets: list[substance.Substance],
+    library: library.Library,
     model: "_Model",
     param_grid: dict[str, list],
-    model_kw: Union[dict[str, Any], None] = None, 
+    model_kw: Union[dict[str, Any], None] = None,
 ) -> list:
     """
     Optimize a model to fit each wild spectra in a list.
@@ -32,13 +33,13 @@ def optimize_models(
     ----------
     targets : list[Substance]
         Unknown/wild HSQC NMR spectrum to fit with the library.
-        
+
     library : Library
         Library of HSQC NMR spectra to use for fitting `targets`.
-        
+
     model : _Model
         Uninstantiated model class to fit the spectra with.
-        
+
     param_grid : dict(str, list)
         Dictionary of parameter grid to search over; this follows the same convention as `sklearn.model_selection.GridSearchCV`.
 
@@ -64,11 +65,11 @@ def optimize_models(
     def build_fitted_model_(model_kw, param_set, library, target):
         """Create and train the model."""
         if model_kw is None:
-            estimator = model() # Use model default parameters
+            estimator = model()  # Use model default parameters
         else:
-            estimator = model(**model_kw) # Set basic parameters manually
+            estimator = model(**model_kw)  # Set basic parameters manually
 
-        estimator.set_params(param_set) # Set specific parameters (alpha, etc.)
+        estimator.set_params(param_set)  # Set specific parameters (alpha, etc.)
         _ = estimator.fit(library.X, target.flatten())
 
         return estimator
@@ -84,24 +85,29 @@ def optimize_models(
 
     param_sets = unroll_(param_grid)
     for target in targets:
-        library.fit(target) # Align library with target
+        library.fit(target)  # Align library with target
 
         scores = []
         for param_set in param_sets:
-            estimator_ = build_fitted_model_(model_kw, param_set, library, target)
+            estimator_ = build_fitted_model_(
+                model_kw, param_set, library, target
+            )
             scores.append(estimator_.score(library.X, target.flatten()))
 
         # Fit final estimator with the "best" parameters
-        estimator = build_fitted_model_(model_kw, param_sets[np.argmax(scores)], library, target)
+        estimator = build_fitted_model_(
+            model_kw, param_sets[np.argmax(scores)], library, target
+        )
 
         optimized_models += [estimator]
 
     return optimized_models
 
+
 def plot_coeffs(
     optimized_models: list[Any],
     norm: Union[str, None] = None,
-    **kwargs : Any,
+    **kwargs: Any,
 ) -> None:
     """
     Plot the coefficients in list of models.
@@ -110,7 +116,7 @@ def plot_coeffs(
     ----------
     optimized_models : list
         List of fitted models (see `optimize_models`).
-        
+
     norm : str, optional(default=None)
         The normalization method used to scale data to the [0, 1] range before mapping to colors.
     """
@@ -119,15 +125,17 @@ def plot_coeffs(
     plt.imshow(coefs_array.T, norm=norm, **kwargs)
     plt.colorbar()
 
+
 class _Model(RegressorMixin, BaseEstimator):
     """
     Model base class wrapper for linear models.
-    
+
     The main reason this is needed is to define a consistent interface to a method to access the model coefficients after fitting.
     """
+
     model: ClassVar[Any]
     model_: ClassVar[Any]
-        
+
     def __init__(self) -> None:
         """
         Instantiate the model.
@@ -135,17 +143,17 @@ class _Model(RegressorMixin, BaseEstimator):
         Note that the sklearn API requires all estimators (subclasses of this) to specify all the parameters that can be set at the class level in their __init__ as explicit keyword arguments (no *args or **kwargs).
         """
         setattr(self, "model_", None)
-        
+
     def set_params(self, **parameters: Any) -> "_Model":
         """Set parameters; for consistency with scikit-learn's estimator API."""
         for parameter, value in parameters.items():
             setattr(self, parameter, value)
         return self
-        
+
     def fit(self, X: NDArray[np.floating], y: NDArray[np.floating]) -> "_Model":
         """
         Fit the model.
-        
+
         Parameters
         ----------
         X : ndarray(float, ndim=1)
@@ -168,11 +176,11 @@ class _Model(RegressorMixin, BaseEstimator):
         setattr(self, "is_fitted_ ", True)
 
         return self
-        
+
     def predict(self, X: NDArray[np.floating]) -> NDArray[np.floating]:
         """
         Predict the (flattened) target HSQC spectra.
-        
+
         Parameters
         ----------
         X : ndarray(float, ndim=1)
@@ -188,8 +196,11 @@ class _Model(RegressorMixin, BaseEstimator):
     def coeff(self) -> NDArray[np.floating]:
         """Return the coefficients in the model."""
         raise NotImplementedError
-        
+
+
 class LASSO(_Model):
+    """LASSO model from sklearn."""
+
     alpha: ClassVar[float]
     precompute: ClassVar[bool]
     copy_X: ClassVar[bool]
@@ -198,17 +209,17 @@ class LASSO(_Model):
     warm_start: ClassVar[bool]
     random_state: ClassVar[Union[int, None]]
     selection: ClassVar[str]
-        
+
     def __init__(
-        self, 
-        alpha: float = 1.0, 
-        precompute: bool = False, 
-        copy_X: bool = True, 
-        max_iter: int = 10000, 
-        tol: float = 0.0001, 
-        warm_start: bool = False, 
-        random_state: Union[int, None] = None, 
-        selection: str = 'cyclic'
+        self,
+        alpha: float = 1.0,
+        precompute: bool = False,
+        copy_X: bool = True,
+        max_iter: int = 10000,
+        tol: float = 0.0001,
+        warm_start: bool = False,
+        random_state: Union[int, None] = None,
+        selection: str = "cyclic",
     ) -> None:
         """
         Instantiate the class.
@@ -216,20 +227,22 @@ class LASSO(_Model):
         Inputs are identical to `sklearn.linear_model.Lasso` except for `fit_intercept` and `positive` which are forced to be `False` and `True`, respectively. Also, `max_iter` is increased from 1,000 to 10,000 by default.
         See https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html
         """
-        self.set_params(**{
-            'alpha': alpha, 
-            'fit_intercept': False, # Always assume no offset
-            'precompute': precompute, 
-            'copy_X': copy_X, 
-            'max_iter': max_iter, 
-            'tol': tol, 
-            'warm_start': warm_start, 
-            'positive': True, # Force coefficients to be positive
-            'random_state': random_state, 
-            'selection': selection
-        })
+        self.set_params(
+            **{
+                "alpha": alpha,
+                "fit_intercept": False,  # Always assume no offset
+                "precompute": precompute,
+                "copy_X": copy_X,
+                "max_iter": max_iter,
+                "tol": tol,
+                "warm_start": warm_start,
+                "positive": True,  # Force coefficients to be positive
+                "random_state": random_state,
+                "selection": selection,
+            }
+        )
         setattr(self, "model_", sklm.Lasso)
-        
+
     def coeff(self) -> NDArray[np.floating]:
         """Return the LASSO model coefficients."""
         return self.model.coef_

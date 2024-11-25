@@ -17,13 +17,13 @@ from typing import Union, Any, ClassVar
 from numpy.typing import NDArray
 
 # def bin_spectrum(
-#     spec_to_bin: NDArray[np.floating], 
-#     window_size: int = 4, 
+#     spec_to_bin: NDArray[np.floating],
+#     window_size: int = 4,
 #     window_size_y: Union[int, None] = None
 # ) -> NDArray[np.floating]:
 #     """
 #     Coarsen HSQC NMR spectrum into discrete histograms.
-    
+
 #     Parameters
 #     ----------
 #     spec_to_bin : ndarray(float, ndim=1)
@@ -33,17 +33,17 @@ from numpy.typing import NDArray
 #         How many neighboring bins to sum together during binning.  A `window_size > 1` will coarsen the spectra.
 
 #     window_size_y : int, optional(default=None)
-#         Window size to use in the `y` direction (axes 0) if different from `window_size`.  If `None`, uses `window_size`. 
+#         Window size to use in the `y` direction (axes 0) if different from `window_size`.  If `None`, uses `window_size`.
 
 #     Returns
 #     -------
 #     spectrum : ndarray(float, ndim=2)
 #         Coarsened HSQC NMR spectrum.
 #     """
-    
+
 #     if window_size_y is None:
 #         window_size_y = window_size
-    
+
 #     cnv = np.zeros_like(spec_to_bin[::window_size_y,::window_size,])
 #     for n,m in itertools.product(
 #         np.arange(window_size_y),
@@ -53,13 +53,6 @@ from numpy.typing import NDArray
 #         cnv += this_array
 
 #     return cnv
-
-
-
-
-
-
-
 
 
 # def plot_nmr(
@@ -79,13 +72,13 @@ from numpy.typing import NDArray
 
 #     extent : list
 #         The bounding box in data coordinates that the spectrum will fill: (left, right, bottom, top). Uses `origin=lower` convention.
-    
+
 #     norm : str, optional(default=None)
 #         The normalization method used to scale data to the [0, 1] range before mapping to colors using `cmap`.
 
 #     ax : matplotlib.pyplot.Axes, optional(default=None)
 #         Axes to plot the image on.
-    
+
 #     cmap : str, optional(default='Reds')
 #         The `matplotlib.colors.Colormap` instance or registered colormap name used to map scalar data to colors.
 
@@ -105,11 +98,11 @@ from numpy.typing import NDArray
 #         extent=extent,
 #         origin='lower',
 #     )
-    
+
 #     colorbar = plt.colorbar(image, ax=ax)
 #     colorbar.set_label('Intensity')
-    
-#     return image, colorbar  
+
+#     return image, colorbar
 
 # class Bruker:
 #     """Methods to manipulate Bruker HSQC NMR spectra."""
@@ -118,13 +111,13 @@ from numpy.typing import NDArray
 #     def read_target_spectra(spectra_directory: str, absolute_value: bool = False) -> tuple[list, list]:
 #         """
 #         Read Bruker HSQC NMR spectra from a directory.
-        
+
 #         Parameters
 #         ----------
 #         spectra_directory : str
 #             Directory where HSQC NMR spectra are stored in default Bruker format.
 
-#         absolute_value : bool, optional(default=False) 
+#         absolute_value : bool, optional(default=False)
 #             Whether or not to take the absolute value of the HSQC NMR spectra read.
 
 #         Returns
@@ -136,7 +129,7 @@ from numpy.typing import NDArray
 #             List of all HSQC NMR spectra obtained.
 #         """
 #         specdirs = os.listdir(spectra_directory)
-        
+
 #         data_list = []
 #         for sd in specdirs:
 #             data_dir = '/'.join(('spectra', sd, 'pdata', '1'))
@@ -151,7 +144,7 @@ from numpy.typing import NDArray
 #     def import_single_raw(sd: str) -> dict:
 #         """
 #         Import a single raw Bruker HSQC NMR spectra.
-        
+
 #         Parameters
 #         ----------
 #         sd : str
@@ -183,51 +176,51 @@ from numpy.typing import NDArray
 #         this_spec['extent'] = extent
 #         this_spec['uc0_scale'] = ax0_scale
 #         this_spec['uc1_scale'] = ax1_scale
-        
+
 #         return this_spec
-    
-    
+
+
 # class Substance:
 #     _data: NDArray[np.floating]
 #     _extent: list
-#     _uc0_scale: 
+#     _uc0_scale:
 #     _uc1_scale
 #     _interp_fcn: Any
-    
+
 #     def __init__(self, filename=None, style='bruker'):
 #         if filename is not None:
 #             self.read(filename=filename, style=style)
 #         return
-    
+
 #     @property
 #     def data(self):
 #         return copy.deepcopy(self._data)
-    
+
 #     @property
 #     def extent(self):
 #         return copy.deepcopy(self._extent)
-    
+
 #     @property
 #     def scale(self):
 #         return (self._uc0_scale, self.__uc1_scale)
-    
+
 #     @property
 #     def fitted(self):
-#         return copy.deepcopy(self._fitted) 
-    
+#         return copy.deepcopy(self._fitted)
+
 #     def read(self, filename, style='bruker'):
 #         return
-    
+
 #     def from_xml(self, filename):
 #         return
-    
+
 #     def fit(self, reference_substance: "Substance") -> "Substance":
 #         # crop_and_pad etc. and store results in fitted
 #         # This can be stored in a library
 #         fitted = Substance()
-        
+
 #         return fitted
-    
+
 #     @staticmethod
 #     def _crop_overlap(scale_to_crop: NDArray[np.floating], target_scale: NDArray[np.floating]) -> tuple[NDArray[np.bool_], NDArray[np.floating]]:
 #         """
@@ -261,7 +254,7 @@ from numpy.typing import NDArray
 #     @staticmethod
 #     def _pad_scale(scale_to_pad: NDArray[np.floating], target_scale: NDArray[np.floating], max_side: str = 'left') -> tuple[tuple, tuple, float]:
 #         """
-#         Pad `scale_to_pad` so that it has roughly the same extent as `target_scale`. 
+#         Pad `scale_to_pad` so that it has roughly the same extent as `target_scale`.
 
 #         The `max_side` keyword defines whether the scales are monotonically increasing or decreasing.
 #         Also, `scale_to_pad` must be monotonic and uniformly spaced.
@@ -332,7 +325,7 @@ from numpy.typing import NDArray
 
 #         return substance_padded, uc0_pad, uc1_pad
 
-    
+
 # class Library:
 #     """
 #     instead, make this contain a list of substances
@@ -340,18 +333,17 @@ from numpy.typing import NDArray
 #     a member called "data" or something flattens this into an X matrix that can be used for fitting
 #     the library should use a substance list when instantiated but do not store these to keep size down
 #     """
-    
-    
-    
+
+
 #     MAX_Y_SIZE: ClassVar[int]
 #     MAX_ASPECT_RATIO: ClassVar[int]
 #     BIN_SCALE: ClassVar[int]
-        
+
 #     def __init__(self, substance_path, binning_size_default = 16, style='bruker'):
 #         self.MAX_Y_SIZE: 256
 #         self.MAX_ASPECT_RATIO: 4
 #         self.BIN_SCALE: 16
-        
+
 #         # 1. Load the data from disk
 #         substance_library = dict()
 #         for substance_name in [x for x in os.listdir(substance_path) if x.endswith('HSQC')]:
@@ -404,11 +396,11 @@ from numpy.typing import NDArray
 #                 substance_library[substance_name] = substance_data
 #             except OSError:
 #                 warnings.warn(f'No data found for substance {substance_name}')
-                
+
 #         self.library = substance_library
-                
+
 #     def fit(self, spec_data):
-        
+
 #         # 2. Crop and Pad
 #         for this_sub_name, v in self.library.items():
 #             this_sub = self.library[this_sub_name]
@@ -423,7 +415,7 @@ from numpy.typing import NDArray
 #             this_sub['uc0_padded'] = uc0_pad
 #             this_sub['uc1_padded'] = uc1_pad
 #             this_sub['extent_padded'] = extent
-        
+
 #         # 3. Resize and take absolute value
 #         self.reconstructed_spectra = dict()
 #         for this_sub_name,v in self.library.items():
@@ -436,8 +428,3 @@ from numpy.typing import NDArray
 
 #     def save(self, filename):
 #         return
-
-
-    
-  
-    
