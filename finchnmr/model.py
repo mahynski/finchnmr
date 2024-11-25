@@ -1,5 +1,5 @@
 """
-Tools to build linear models.
+Tools to build models.
 
 Authors: Nathan A. Mahynski
 """

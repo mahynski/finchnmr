@@ -9,6 +9,7 @@ import matplotlib
 import os
 import skimage
 
+import matplotlib.pyplot as plt
 import nmrglue as ng
 import numpy as np
 import scipy.interpolate as spint
@@ -23,26 +24,26 @@ class Substance:
     _uc1_scale: ClassVar[NDArray[np.floating]]
     _interp_fcn: ClassVar[Any]
     
-    def __init__(self, filename: Union[str, None] = None, style: str = 'bruker') -> None:
+    def __init__(self, pathname: Union[str, None] = None, style: str = 'bruker') -> None:
         """
-        Instantiate the class.
+        Instantiate the substance.
         
-        If `filename=None` no data is read.
+        If `pathname=None` no data is read.
         
         Parameters
         ----------
-        filename : str, optional(default=None)
-            If specified, read data from this file; otherwise create an empty class.
+        pathname : str, optional(default=None)
+            If specified, read data from this folder; otherwise create an empty class.
             
         style : str, optional(default="bruker")
-            Manufacturer of NMR instrument which dictates how to extract this information. If `filename=None` this is ignored. 
+            Manufacturer of NMR instrument which dictates how to extract this information. If `pathname=None` this is ignored. 
             
         Example
         -------
         >>> s = Substance('test_data/my_substance/pdata/1', style='bruker')
         """
-        if filename is not None:
-            self.read(filename=filename, style=style)
+        if pathname is not None:
+            self.read(pathname=pathname, style=style)
     
     @property
     def data(self):
@@ -103,12 +104,15 @@ class Substance:
 
         return cnv
 
-    def read(self, filename, style='bruker'):
+    def read(self, pathname, style='bruker'):
         """
         Read HSQC NMR spectrum from a directory created by the instrument.
         
         Parameters
         ----------
+        pathname : str, optional(default=None)
+            Read data from this folder.
+            
         style : str, optional(default='bruker')
             Manufacturer of NMR instrument which dictates how to extract this information. At the moment only 'bruker' is supported.
             
@@ -122,14 +126,14 @@ class Substance:
         BIN_SCALE = 16
             
         # Conver to absolute path
-        filename = os.path.abspath(filename)
+        pathname = os.path.abspath(pathname)
             
         try:
             # Read the pdata, extracting the nmr data and the metadata dictionary
             if style.lower() == 'bruker':
-                if filename.split('/')[-2] != 'pdata':
-                    raise ValueError('For style="bruker" the filename should include the path to the subfolder in "pdata".')
-                dic, data_raw = ng.bruker.read_pdata(dir=filename)
+                if pathname.split('/')[-2] != 'pdata':
+                    raise ValueError('For style="bruker" the pathname should include the path to the subfolder in "pdata".')
+                dic, data_raw = ng.bruker.read_pdata(dir=pathname)
                 u = ng.bruker.guess_udic(dic, data_raw)
             else:
                 raise ValueError(f'Unrecognized manufacturer: {style}')
@@ -152,24 +156,25 @@ class Substance:
             uc1 = ng.fileiobase.uc_from_udic(u, 1)
             uc1_scale = uc1.ppm_scale()[binning_size // 2::binning_size]
         except Exception as e:
-            raise Exception(f'Unable to read substance in {filename} : {e}')
+            raise Exception(f'Unable to read substance in {pathname} : {e}')
                 
-        self._data = self.bin_spectrum(data_raw, window_size=binning_size, window_size_y=binning_size_y)
-        self._extent = [uc1_scale.max(), uc1_scale.min(), uc0_scale.max(), uc0_scale.min()] # Limits are chosen so ppm goes in the correct direction
-        self._uc0_scale = uc0_scale
-        self._uc1_scale = uc1_scale
-        self._interp_fcn = spint.RegularGridInterpolator(
-            (self._uc0_scale, self._uc1_scale),
-            self._data,
-            fill_value=0,
-            bounds_error=False,
-            method='cubic',
-        )
+        setattr(self, "_data", self.bin_spectrum(data_raw, window_size=binning_size, window_size_y=binning_size_y))
+        setattr(self, "_extent", [uc1_scale.max(), uc1_scale.min(), uc0_scale.max(), uc0_scale.min()]) # Limits are chosen so ppm goes in the correct direction
+        setattr(self, "_uc0_scale", uc0_scale)
+        setattr(self, "_uc1_scale", uc1_scale)
+        setattr(self, "_interp_fcn", spint.RegularGridInterpolator(
+                (self._uc0_scale, self._uc1_scale),
+                self._data,
+                fill_value=0,
+                bounds_error=False,
+                method='cubic',
+            )
+        )        
             
         return
     
     def from_xml(self, filename):
-        return
+        raise NotImplementedError
     
     def fit(self, reference: "Substance") -> "Substance":
         """
@@ -188,26 +193,30 @@ class Substance:
         aligned = Substance()
         
         # 1. Crop and pad to match reference_substance
-        aligned._data, aligned._uc0_scale, aligned._uc1_scale = self._crop_and_pad(reference)
-        aligned._extent = [aligned._uc1_scale.max(), aligned._uc1_scale.min(), aligned._uc0_scale.max(), aligned._uc0_scale.min()]
+        _data, _uc0_scale, _uc1_scale = self._crop_and_pad(reference)
+        setattr(aligned, "_data", _data)
+        setattr(aligned, "_uc0_scale", _uc0_scale)
+        setattr(aligned, "_uc1_scale", _uc1_scale)
+        setattr(aligned, "_extent", [aligned._uc1_scale.max(), aligned._uc1_scale.min(), aligned._uc0_scale.max(), aligned._uc0_scale.min()])
         
         # 2. Resize and take absolute value
-        aligned._data = np.abs(
-            skimage.transform.resize(
-                aligned._data,
-                reference_substance._data.shape
+        setattr(aligned, "_data", np.abs(
+                skimage.transform.resize(
+                    aligned._data,
+                    reference._data.shape
+                )
             )
         )
         
         return aligned
     
-    def _crop_and_pad(self, reference_substance: "Substance") -> tuple[NDArray[np.floating], NDArray[np.floating], NDArray[np.floating]]:
+    def _crop_and_pad(self, reference: "Substance") -> tuple[NDArray[np.floating], NDArray[np.floating], NDArray[np.floating]]:
         """
-        Compute overlap masks.
+        Crop and/or pad the 2D HSQC NMR spectrum to be aligned with the reference HSQC NMR spectrum.
 
         Parameters
         ----------
-        reference_substance : Substance
+        reference : Substance
             Another Substance we would like to "align" this NMR spectrum with.
             
         Returns
@@ -273,13 +282,13 @@ class Substance:
 
             return (max_incs, min_incs), (pad_left, pad_right), padded_scale
     
-        overlap_mask0, uc0_overlap = crop_overlap(self._uc0_scale, reference_substance._uc0_scale)
-        overlap_mask1, uc1_overlap = crop_overlap(self._uc1_scale, reference_substance._uc1_scale)
+        overlap_mask0, uc0_overlap = crop_overlap(self._uc0_scale, reference._uc0_scale)
+        overlap_mask1, uc1_overlap = crop_overlap(self._uc1_scale, reference._uc1_scale)
         
         data_overlap = self._data[overlap_mask0, :][:, overlap_mask1]
 
-        pad0, _, uc0_pad = pad_scale(uc0_overlap[:], reference_substance._uc0_scale)
-        pad1, _, uc1_pad = pad_scale(uc1_overlap[:], reference_substance._uc1_scale)
+        pad0, _, uc0_pad = pad_scale(uc0_overlap[:], reference._uc0_scale)
+        pad1, _, uc1_pad = pad_scale(uc1_overlap[:], reference._uc1_scale)
 
         data_padded = np.pad(data_overlap, (pad0, pad1))
 
