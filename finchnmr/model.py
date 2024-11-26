@@ -3,9 +3,10 @@ Tools to build models.
 
 Authors: Nathan A. Mahynski
 """
+import copy
+import matplotlib
 import pickle
 import tqdm
-import copy
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -26,9 +27,11 @@ def optimize_models(
     nmr_model: "_Model",
     param_grid: dict[str, list],
     model_kw: Union[dict[str, Any], None] = None,
-) -> list:
+) -> tuple[list["_Model"], list["Analysis"]]:
     """
     Optimize a model to fit each wild spectra in a list.
+
+    All combinations of parameters in `param_grid` are tested and the best performer is retained.
 
     Parameters
     ----------
@@ -52,16 +55,23 @@ def optimize_models(
     optimized_models : list(_Model)
         List of optimized models fit to each target HSQC NMR spectrum.
 
+    analyses : list(Analysis)
+        List of analysis objects to help visualize and understand each fitted model.
+
     Example
     -------
-    >>> optimized_models = finchnmr.model.optimize_models(
+    >>> target = finchnmr.substance.Substance(...) # Load target(s)
+    >>> nmr_library = finchnmr.library.Library(...) # Create library
+    >>> optimized_models, analyses = finchnmr.model.optimize_models(
     ...     targets=[target],
     ...     nmr_library=nmr_library,
     ...     nmr_model=finchnmr.model.LASSO,
     ...     param_grid={'alpha': np.logspace(-5, 1, 100)},
     ... )
+    >>> analyses[0].plot_top_spectra(k=5)
     """
     optimized_models = []
+    analyses = []
 
     def build_fitted_model_(model_kw, param_set, nmr_library, target):
         """Create and train the model."""
@@ -113,17 +123,18 @@ def optimize_models(
         )
 
         optimized_models += [estimator]
+        analyses += [Analysis(model=estimator)]
 
-    return optimized_models
+    return optimized_models, analyses
 
 
-def plot_coeffs(
+def plot_stacked_importances(
     optimized_models: list[Any],
     norm: Union[str, None] = None,
     **kwargs: Any,
-) -> None:
+) -> tuple["matplotlib.image.AxesImage", "matplotlib.pyplot.colorbar"]:
     """
-    Plot the coefficients in list of models.
+    Plot the importance values in list of models.
 
     Parameters
     ----------
@@ -132,11 +143,184 @@ def plot_coeffs(
 
     norm : str, optional(default=None)
         The normalization method used to scale data to the [0, 1] range before mapping to colors.
+
+    kwargs : dict, optional(default=None)
+        Additional keyword arguments for pyplot.imshow() function.
+
+    Returns
+    -------
+    image : matplotlib.image.AxesImage
+        Feature importances as an image of a grid where each column corresponds to a different model and each row to a different feature (in the unrolled HSQC NMR spectrum).
+
+    colorbar : matplotlib.pyplot.colorbar
+        Colorbar to go with the image.
+
+    Example
+    -------
+    >>> optimized_models, analyses = finchnmr.model.optimize_models(...)
+    >>> plot_stacked_importances(optimized_models)
     """
-    coefs_list = [m.coeff() for m in optimized_models]
-    coefs_array = np.stack(coefs_list)
-    plt.imshow(coefs_array.T, norm=norm, **kwargs)
-    plt.colorbar()
+    imp_list = [m.importances() for m in optimized_models]
+    imps_array = np.stack(imp_list)
+    _, ax = plt.subplots()
+
+    image = ax.imshow(imps_array.T, norm=norm, **kwargs)
+    colorbar = plt.colorbar(image, ax=ax)
+    colorbar.set_label("Importance")
+
+    return image, colorbar
+
+
+class Analysis:
+    """Set of analysis methods for analyzing fitted models."""
+
+    _model: ClassVar["_Model"]
+
+    def __init__(self, model: "_Model") -> None:
+        """
+        Instantiate the class.
+
+        Parameters
+        ----------
+        model : _Model
+            Fitted model to some target, see `optimize_models`.
+        """
+        setattr(self, "_model", model)
+
+    def plot_top_spectra(
+        self,
+        k: int = 5,
+        plot_width: int = 3,
+        figsize: Union[tuple[int, int], None] = (10, 5),
+    ) -> NDArray["matplotlib.pyplot.Axes"]:
+        """
+        Plot the HSQC NMR spectra that are the most importance to the model.
+
+        Parameters
+        ----------
+        k : int, optional(default=5)
+            Number of most important spectra to plot.  If -1 then plot them all.
+
+        plot_width : int, optional(default=3)
+            Number of subplots the grid will have along its width.
+
+        figsize : tuple(int, int), optional(default=(10,5))
+            Size of final figure.
+
+        Returns
+        -------
+        axes : ndarray(matplotlib.pyplot.Axes, ndim=1)
+            Flattened array of axes on which the spectra are plotted.
+        """
+        if k == -1:
+            k = len(self._model.importances())
+
+        plot_depth = int(np.ceil(k / plot_width))
+        fig, axes_ = plt.subplots(
+            nrows=plot_depth, ncols=plot_width, figsize=figsize
+        )
+        axes = axes_.flatten()
+
+        # Plot the NMR spectra
+        for i, (idx_, importances_) in enumerate(
+            sorted(
+                list(enumerate(self._model.importances())),
+                key=lambda x: np.abs(x[1]),
+                reverse=True,
+            )[:k]
+        ):
+            s_ = self._model._nmr_library.substance_by_index(idx_)
+            s_.plot(ax=axes[i])
+            axes[i].set_title(
+                s_.name + "\nI = {}".format("%.4f" % importances_)
+            )
+
+        # Trim of extra subplots
+        for i in range(k, plot_depth * plot_width):
+            axes[i].remove()
+
+        return axes
+
+    def plot_top_importances(
+        self,
+        k: int = 5,
+        by_name: bool = False,
+        figsize: Union[tuple[int, int], None] = None,
+    ) -> "matplotlib.pyplot.Axes":
+        """
+        Plot the importances of the top substances in the model.
+
+        Parameters
+        ----------
+        k : int, optional(default=5)
+            Number of top importances to plot.  If -1 then plot them all.
+
+        by_name : bool, optional(default=False)
+            HSQC NMR spectra will given by integer index in the library by default; if True, the use the associated substance name instead.
+
+        figsize : tuple(int, int), optional(default=None))
+            Size of final figure.
+
+        Returns
+        -------
+        axes : matplotlib.pyplot.Axes
+            Horizontal bar chart the importances are plotted on in descending order.
+        """
+        if k == -1:
+            k = len(self._model.importances())
+
+        sorted_importances = sorted(
+            list(enumerate(self._model.importances())),
+            key=lambda x: np.abs(x[1]),
+            reverse=True,
+        )[:k]
+
+        if by_name:
+            labels = [
+                self._model._nmr_library.substance_by_index(x[0]).name
+                for x in sorted_importances
+            ]
+        else:
+            labels = [str(x[0]) for x in sorted_importances]
+
+        fig, axes = plt.subplots(nrows=1, ncols=1, figsize=figsize)
+
+        axes.barh(
+            y=np.arange(k)[::-1],
+            width=[h[1] for h in sorted_importances],
+            align="center",
+            tick_label=labels,
+        )
+        axes.set_xlabel("Importance")
+
+        return axes
+
+    def plot_residual(
+        self,
+    ) -> tuple["matplotlib.image.AxesImage", "matplotlib.pyplot.colorbar"]:
+        """
+        Plot the residual (target - reconstructed) spectrum.
+
+        Returns
+        -------
+        image : matplotlib.image.AxesImage
+            HSQC NMR resdual spectrum as an image.
+
+        colorbar : matplotlib.pyplot.colorbar
+            Colorbar to go with the image.
+        """
+        target = self._model.target()
+        reconstructed = self._model.reconstruct()
+
+        fake = (
+            self._model.target()
+        )  # Create a new copy of the target as a baseline
+        fake._set_data(target.data - reconstructed.data)
+
+        image, colorbar = fake.plot()
+        plt.gca().set_title("Target - Reconstructed")
+
+        return image, colorbar
 
 
 class _Model(RegressorMixin, BaseEstimator):
@@ -145,6 +329,9 @@ class _Model(RegressorMixin, BaseEstimator):
     model: ClassVar[Any]
     model_: ClassVar[Any]
     _nmr_library: ClassVar["library.Library"]
+    _score: ClassVar[float]
+    _scale_y: ClassVar[NDArray[np.floating]]
+    is_fitted_: ClassVar[bool]
 
     def __init__(self) -> None:
         """
@@ -152,6 +339,7 @@ class _Model(RegressorMixin, BaseEstimator):
 
         Note that the sklearn API requires all estimators (subclasses of this) to specify all the parameters that can be set at the class level in their __init__ as explicit keyword arguments (no *args or **kwargs).
         """
+        setattr(self, "is_fitted_", False)
         setattr(self, "model_", None)
 
     def set_params(self, **parameters: Any) -> "_Model":
@@ -159,6 +347,13 @@ class _Model(RegressorMixin, BaseEstimator):
         for parameter, value in parameters.items():
             setattr(self, parameter, value)
         return self
+
+    def target(self):
+        """Return the target this model is meant to reproduce."""
+        if self.is_fitted_:
+            return copy.deepcopy(self._nmr_library._fit_to)
+        else:
+            raise Exception("Model has not been fit yet.")
 
     def fit(
         self, nmr_library: "library.Library", target: "substance.Substance"
@@ -184,27 +379,37 @@ class _Model(RegressorMixin, BaseEstimator):
         if self.model_ is None:
             raise Exception("model has not been set yet.")
         else:
-            setattr(self, "model", self.model_(**self.get_params()))
+            setattr(self, "model", self.model_(**self.get_model_params()))
             setattr(self, "_nmr_library", copy.deepcopy(nmr_library))
-            
-        # Align library with target
+
+        # Align library with target - this also saves target internally
         self._nmr_library.fit(target)
-        
-        # Target needs to take absolute value and optionally be scaled in [0, 1]; same as when library is aligned.
-        
-        # ...
-        
-        
-        # When predicting / reconstructing, scale the model output back to "real" units
-        
-        
 
-        _ = self.model.fit(
-            self._nmr_library.X, self._nmr_library._fit_to.flatten()
-        )
-        setattr(self, "is_fitted_ ", True)
+        # Transform library to normalize
+        X, _ = self.transform(self._nmr_library.X)
 
+        # Tansform target in a similar way
+        y, scale_y = self.transform(target.flatten().reshape(-1, 1))
+        setattr(self, "_scale_y", scale_y)
+        #         y = target.flatten().reshape(-1, 1)
+        #         setattr(self, "_scale_y", 1.0)
+
+        # Fit the model
+        _ = self.model.fit(X, y)
+
+        # Store the score of this fit
+        setattr(self, "_score", self.model.score(X, y))
+
+        setattr(self, "is_fitted_", True)
         return self
+
+    @staticmethod
+    def transform(X):
+        X_t = np.abs(
+            X
+        )  # Convert library intensities to absolute values, [0, inf)
+        scale = np.max(X_t, axis=0)  # Scale library to [0, 1]
+        return X_t / scale, scale
 
     def predict(self) -> NDArray[np.floating]:
         """
@@ -215,7 +420,15 @@ class _Model(RegressorMixin, BaseEstimator):
         spectrum : ndarray(float, ndim=1)
             Predicted (flattened) spectrum fit to the given `nmr_library`.
         """
-        return self.model.predict(self._nmr_library.X)
+        if not self.is_fitted_:
+            raise Exception("Model has not been fit yet.")
+
+        y_pred = self.model.predict(self.transform(self._nmr_library.X)[0])
+
+        # When predicting / reconstructing, scale the model output back to
+        # "real" units.  This is still absolute value / intensity space but
+        # has the proper magnitude for comparison with the target spectrum.
+        return y_pred * self._scale_y
 
     def score(self) -> float:
         """
@@ -226,19 +439,25 @@ class _Model(RegressorMixin, BaseEstimator):
         score : float
             Coefficient of determination of the model that uses `nmr_library` to predict `target`.
         """
-        return self.model.score(
-            self._nmr_library.X, self._nmr_library._fit_to.flatten()
-        )
+        if not self.is_fitted_:
+            raise Exception("Model has not been fit yet.")
+        return self._score
 
     def reconstruct(self) -> "substance.Substance":
         """Reconstruct a 2D HSQC NMR spectrum using the fitted model."""
-        reconstructed = copy.deepcopy(self._nmr_library._fit_to)
+        if not self.is_fitted_:
+            raise Exception("Model has not been fit yet.")
+        reconstructed = self.target()
         reconstructed._set_data(reconstructed.unflatten(self.predict()))
 
         return reconstructed
 
-    def coeff(self) -> NDArray[np.floating]:
-        """Return the coefficients in the model."""
+    def importances(self) -> NDArray[np.floating]:
+        """Return the importances of each feature in the model."""
+        raise NotImplementedError
+
+    def get_model_params(self) -> dict[str, Any]:
+        """Get the parameters needed to instantiate the model."""
         raise NotImplementedError
 
 
@@ -253,6 +472,9 @@ class LASSO(_Model):
     warm_start: ClassVar[bool]
     random_state: ClassVar[Union[int, None]]
     selection: ClassVar[str]
+
+    fit_intercept: ClassVar[bool]
+    positive: ClassVar[bool]
 
     def __init__(
         self,
@@ -271,6 +493,8 @@ class LASSO(_Model):
         Inputs are identical to `sklearn.linear_model.Lasso` except for `fit_intercept` and `positive` which are forced to be `False` and `True`, respectively. Also, `max_iter` is increased from 1,000 to 10,000 by default.
         See https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html
         """
+        super().__init__()
+
         self.set_params(
             **{
                 "alpha": alpha,
@@ -287,6 +511,21 @@ class LASSO(_Model):
         )
         setattr(self, "model_", sklm.Lasso)
 
-    def coeff(self) -> NDArray[np.floating]:
-        """Return the LASSO model coefficients."""
+    def get_model_params(self) -> dict[str, Any]:
+        """Return the parameters for an sklearn.linear_model.Lasso model."""
+        return {
+            "alpha": self.alpha,
+            "fit_intercept": self.fit_intercept,
+            "precompute": self.precompute,
+            "copy_X": self.copy_X,
+            "max_iter": self.max_iter,
+            "tol": self.tol,
+            "warm_start": self.warm_start,
+            "positive": self.positive,
+            "random_state": self.random_state,
+            "selection": self.selection,
+        }
+
+    def importances(self) -> NDArray[np.floating]:
+        """Return the Lasso model coefficients as importances."""
         return self.model.coef_

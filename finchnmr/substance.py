@@ -15,25 +15,32 @@ import numpy as np
 import scipy.interpolate as spint
 
 from numpy.typing import NDArray
-from typing import Any, Union, ClassVar
+from typing import Any, Union, ClassVar, Literal
 
 # Turn warnings from bruker.guess_udic into errors
 import warnings
-
-warnings.filterwarnings("error")
 
 
 class Substance:
     """Substance that was measured with HSQC NMR."""
 
+    _name: ClassVar[str]
     _data: ClassVar[NDArray[np.floating]]
     _extent: ClassVar[list]
     _uc0_scale: ClassVar[NDArray[np.floating]]
     _uc1_scale: ClassVar[NDArray[np.floating]]
     _interp_fcn: ClassVar[Any]
+    _window_size: ClassVar[int]
+    _window_size_y: ClassVar[Union[int, None]]
 
     def __init__(
-        self, pathname: Union[str, None] = None, style: str = "bruker"
+        self,
+        pathname: Union[str, None] = None,
+        name: str = "",
+        style: str = "bruker",
+        warning: Literal[
+            "default", "error", "ignore", "always", "all", "module", "once"
+        ] = "error",
     ) -> None:
         """
         Instantiate the substance.
@@ -45,15 +52,28 @@ class Substance:
         pathname : str, optional(default=None)
             If specified, read data from this folder; otherwise create an empty class.
 
+        name : str, optional(default="")
+            Name of the substance, e.g., "octanol".
+
         style : str, optional(default="bruker")
             Manufacturer of NMR instrument which dictates how to extract this information. If `pathname=None` this is ignored.
+
+        warning : str, optional(default="error")
+            How to handle warnings thrown when reading from disk; 'error' causes an Exception to be thrown stopping the code, however, if you are confident that the warnings are not relevant, you can set this to 'default' to simply report the warnings instead.
 
         Example
         -------
         >>> s = Substance('test_data/my_substance/pdata/1', style='bruker')
         """
         if pathname is not None:
-            self.read(pathname=pathname, style=style)
+            self.read(
+                pathname=pathname, name=name, style=style, warning=warning
+            )
+
+    @property
+    def name(self) -> str:
+        """Return the name of the substance."""
+        return self._name
 
     @property
     def data(self) -> NDArray[np.floating]:
@@ -135,7 +155,15 @@ class Substance:
 
         return cnv
 
-    def read(self, pathname: str, style: str = "bruker") -> None:
+    def read(
+        self,
+        pathname: str,
+        name: str = "",
+        style: str = "bruker",
+        warning: Literal[
+            "default", "error", "ignore", "always", "all", "module", "once"
+        ] = "error",
+    ) -> None:
         """
         Read HSQC NMR spectrum from a directory created by the instrument.
 
@@ -144,13 +172,19 @@ class Substance:
         pathname : str, optional(default=None)
             Read data from this folder.
 
+        name : str, optional(default=None)
+            Name of the substance, e.g., "octanol".
+
         style : str, optional(default='bruker')
             Manufacturer of NMR instrument which dictates how to extract this information. At the moment only 'bruker' is supported.
+
+        warning : str, optional(default="error")
+            How to handle warnings thrown when reading from disk; 'error' causes an Exception to be thrown stopping the code, however, if you are confident that the warnings are not relevant, you can set this to 'default' to simply report the warnings instead.
 
         Example
         -------
         >>> s = Substance()
-        >>> s.read('test_data/my_substance/pdata/1', style='bruker')
+        >>> s.read('test_data/my_substance/pdata/1', name='my_substance', style='bruker')
         """
         MAX_Y_SIZE = 256
         MAX_ASPECT_RATIO = 4
@@ -160,36 +194,40 @@ class Substance:
         pathname = os.path.abspath(pathname)
 
         try:
-            # Read the pdata, extracting the nmr data and the metadata dictionary
-            if style.lower() == "bruker":
-                if pathname.split("/")[-2] != "pdata":
-                    raise ValueError(
-                        'For style="bruker" the pathname should include the path to the subfolder in "pdata".'
-                    )
-                dic, data_raw = ng.bruker.read_pdata(dir=pathname)
-                u = ng.bruker.guess_udic(dic, data_raw)
-            else:
-                raise ValueError(f"Unrecognized manufacturer: {style}")
+            with warnings.catch_warnings():
+                # Adjust warning behavior during this stage
+                warnings.simplefilter(warning)
 
-            # This is very custom logic
-            if data_raw.shape[1] > MAX_Y_SIZE:
-                binning_size = 16
-                if data_raw.shape[1] / data_raw.shape[0] > MAX_ASPECT_RATIO:
-                    binning_size_y = binning_size // BIN_SCALE
+                # Read the pdata, extracting the nmr data and the metadata dictionary
+                if style.lower() == "bruker":
+                    if pathname.split("/")[-2] != "pdata":
+                        raise ValueError(
+                            'For style="bruker" the pathname should include the path to the subfolder in "pdata".'
+                        )
+                    dic, data_raw = ng.bruker.read_pdata(dir=pathname)
+                    u = ng.bruker.guess_udic(dic, data_raw)
                 else:
-                    binning_size_y = binning_size
-            else:
-                binning_size = 1
-                binning_size_y = 1
+                    raise ValueError(f"Unrecognized manufacturer: {style}")
 
-            # Extract axis scale information from metadata; axis 0 is the y axis, axis 1 is the x axis
-            uc0 = ng.fileiobase.uc_from_udic(u, 0)
-            uc0_scale = uc0.ppm_scale()[
-                binning_size_y // 2 :: binning_size_y
-            ]  # ppm read locations (should be uniformly spaced)
+                # This is very custom logic
+                if data_raw.shape[1] > MAX_Y_SIZE:
+                    binning_size = 16
+                    if data_raw.shape[1] / data_raw.shape[0] > MAX_ASPECT_RATIO:
+                        binning_size_y = binning_size // BIN_SCALE
+                    else:
+                        binning_size_y = binning_size
+                else:
+                    binning_size = 1
+                    binning_size_y = 1
 
-            uc1 = ng.fileiobase.uc_from_udic(u, 1)
-            uc1_scale = uc1.ppm_scale()[binning_size // 2 :: binning_size]
+                # Extract axis scale information from metadata; axis 0 is the y axis, axis 1 is the x axis
+                uc0 = ng.fileiobase.uc_from_udic(u, 0)
+                uc0_scale = uc0.ppm_scale()[
+                    binning_size_y // 2 :: binning_size_y
+                ]  # ppm read locations (should be uniformly spaced)
+
+                uc1 = ng.fileiobase.uc_from_udic(u, 1)
+                uc1_scale = uc1.ppm_scale()[binning_size // 2 :: binning_size]
         except Exception as e:
             raise Exception(f"Unable to read substance in {pathname} : {e}")
 
@@ -200,6 +238,8 @@ class Substance:
                 data_raw, window_size=binning_size, window_size_y=binning_size_y
             ),
         )
+        setattr(self, "_window_size", binning_size)
+        setattr(self, "_window_size_y", binning_size_y)
         setattr(
             self,
             "_extent",
@@ -223,6 +263,7 @@ class Substance:
                 method="cubic",
             ),
         )
+        setattr(self, "_name", name)
 
         return
 
@@ -233,7 +274,7 @@ class Substance:
     def fit(self, reference: "Substance") -> "Substance":
         """
         Align this substance to another one which serves as a reference.
-        
+
         This also transforms the intensities to absolute values.
 
         Parameters
@@ -264,13 +305,11 @@ class Substance:
             ],
         )
 
-        # 2. Resize and take absolute value
+        # 2. Resize
         setattr(
             aligned,
             "_data",
-            np.abs(
-                skimage.transform.resize(aligned._data, reference._data.shape)
-            ),
+            skimage.transform.resize(aligned._data, reference._data.shape),
         )
 
         return aligned
@@ -379,6 +418,7 @@ class Substance:
         norm: Union[str, None] = None,
         ax: Union["matplotlib.pyplot.Axes", None] = None,
         cmap="RdBu",
+        absolute_values=False,
     ) -> tuple["matplotlib.image.AxesImage", "matplotlib.pyplot.colorbar"]:
         """
         Plot a single HSQC NMR spectrum.
@@ -393,6 +433,9 @@ class Substance:
 
         cmap : str, optional(default='RdBu')
             The `matplotlib.colors.Colormap` instance or registered colormap name used to map scalar data to colors.
+
+        absolute_values : bool, optional(default=False)
+            Whether to plot the absolute values of the data (intensities).
 
         Returns
         -------
@@ -411,7 +454,7 @@ class Substance:
             )
 
         image = ax.imshow(
-            self._data,
+            self._data if not absolute_values else np.abs(self._data),
             cmap=cmap,
             aspect="auto",
             norm=norm,

@@ -3,6 +3,7 @@ Functions for defining a library of substances measured with HSQC NMR.
 
 Authors: Nathan A. Mahynski, David A. Sheen
 """
+import copy
 import pickle
 
 from . import substance
@@ -16,8 +17,8 @@ from typing import ClassVar
 class Library:
     """Library of substances for fitting new unknowns."""
 
-    substances: ClassVar[list["substance.Substance"]]
     is_fitted_: ClassVar[bool]
+    _substances: ClassVar[list["substance.Substance"]]
     _fit_to: "substance.Substance"
     _X: ClassVar[NDArray[np.floating]]
 
@@ -46,7 +47,7 @@ class Library:
         >>>     substances.append(finchnmr.substance.Substance(pathname_))
         >>> L = finchnmr.library.Library(substances=substances)
         """
-        setattr(self, "substances", substances)
+        setattr(self, "_substances", substances)
         setattr(self, "is_fitted_", False)
 
     def fit(self, reference: "substance.Substance") -> "Library":
@@ -63,14 +64,11 @@ class Library:
         self
         """
         aligned = []
-        for sub in self.substances:
-            aligned.append(sub.fit(reference).flatten()) # Intensities become absolute values
+        for sub in self._substances:
+            aligned.append(sub.fit(reference).flatten())
         setattr(self, "_X", np.array(aligned, dtype=np.float64).T)
         setattr(self, "_fit_to", reference)
         setattr(self, "is_fitted_", True)
-        
-        # Normalize each spectra by its maximum intensity - after absolute value, now in [0, 1]
-        setattr(self, "_X", self._X / self._X.max(axis=0))
 
         return self
 
@@ -82,7 +80,7 @@ class Library:
         Returns
         -------
         X : ndarray(float, ndim=2)
-            This data is arranged in a 2D array, where each COLUMN is the flattened HSQC NMR spectrum of a different substance (row). The ordering follows that with which the library was instantiated.
+            This data is arranged in a 2D array, where each column is the flattened HSQC NMR spectrum of a different substance (row). The ordering follows that with which the library was instantiated.
 
         Example
         -------
@@ -96,6 +94,41 @@ class Library:
             raise Exception(
                 "Library has not been fit to a reference substance yet."
             )
+
+    def substance_by_index(self, idx: int) -> "substance.Substance":
+        """
+        Retrieve a substance from the library by index.
+
+        Parameters
+        ----------
+        idx : int
+            Index of the substance in the library.
+
+        Returns
+        -------
+        substance : Substance
+            Desired substance.
+        """
+        return copy.copy(self._substances[idx])
+
+    def substance_by_name(self, name: str) -> "substance.Substance":
+        """
+        Retrieve a substance from the library by name.
+
+        Parameters
+        ----------
+        name : str
+            Name of the substance in the library.
+
+        Returns
+        -------
+        substance : Substance
+            Desired substance.
+        """
+        for s in self._substances:
+            if s.name == name:
+                return copy.copy(s)
+        raise ValueError(f"No substance with name {name} in library.")
 
     def save(self, filename: str) -> None:
         """
