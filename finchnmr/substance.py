@@ -26,7 +26,7 @@ class Substance:
 
     _name: ClassVar[str]
     _data: ClassVar[NDArray[np.floating]]
-    _extent: ClassVar[list]
+    _extent: ClassVar[tuple[float, float, float, float]]
     _uc0_scale: ClassVar[NDArray[np.floating]]
     _uc1_scale: ClassVar[NDArray[np.floating]]
     _interp_fcn: ClassVar[Any]
@@ -81,7 +81,7 @@ class Substance:
         return copy.deepcopy(self._data)
 
     @property
-    def extent(self) -> list:
+    def extent(self) -> tuple[float, float, float, float]:
         """Return the bounds of the spectrum."""
         return copy.deepcopy(self._extent)
 
@@ -243,12 +243,12 @@ class Substance:
         setattr(
             self,
             "_extent",
-            [
+            (
                 uc1_scale.max(),
                 uc1_scale.min(),
                 uc0_scale.max(),
                 uc0_scale.min(),
-            ],
+            ),
         )  # Limits are chosen so ppm goes in the correct direction
         setattr(self, "_uc0_scale", uc0_scale)
         setattr(self, "_uc1_scale", uc1_scale)
@@ -297,12 +297,12 @@ class Substance:
         setattr(
             aligned,
             "_extent",
-            [
+            (
                 aligned._uc1_scale.max(),
                 aligned._uc1_scale.min(),
                 aligned._uc0_scale.max(),
                 aligned._uc0_scale.min(),
-            ],
+            ),
         )
 
         # 2. Resize
@@ -415,11 +415,11 @@ class Substance:
 
     def plot(
         self,
-        norm: Union[str, None] = None,
+        norm: Union["matplotlib.colors.Normalize", None] = None,
         ax: Union["matplotlib.pyplot.Axes", None] = None,
         cmap="RdBu",
         absolute_values=False,
-    ) -> tuple["matplotlib.image.AxesImage", "matplotlib.pyplot.colorbar"]:
+    ) -> tuple["matplotlib.image.AxesImage", "matplotlib.colorbar.Colorbar"]:
         """
         Plot a single HSQC NMR spectrum.
 

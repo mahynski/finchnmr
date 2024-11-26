@@ -133,7 +133,7 @@ def plot_stacked_importances(
     norm: Union[str, None] = None,
     figsize: Union[tuple[int, int], None] = None,
     **kwargs: Any,
-) -> tuple["matplotlib.image.AxesImage", "matplotlib.pyplot.colorbar"]:
+) -> tuple["matplotlib.image.AxesImage", "matplotlib.colorbar.Colorbar"]:
     """
     Plot the importance values in list of models.
 
@@ -193,7 +193,7 @@ class Analysis:
         k: int = 5,
         plot_width: int = 3,
         figsize: Union[tuple[int, int], None] = (10, 5),
-    ) -> NDArray["matplotlib.pyplot.Axes"]:
+    ) -> NDArray:
         """
         Plot the HSQC NMR spectra that are the most importance to the model.
 
@@ -317,7 +317,7 @@ class Analysis:
 
     def plot_residual(
         self, **kwargs
-    ) -> tuple["matplotlib.image.AxesImage", "matplotlib.pyplot.colorbar"]:
+    ) -> tuple["matplotlib.image.AxesImage", "matplotlib.colorbar.Colorbar"]:
         """
         Plot the residual (target - reconstructed) spectrum.
 
@@ -333,7 +333,7 @@ class Analysis:
         image : matplotlib.image.AxesImage
             HSQC NMR resdual spectrum as an image.
 
-        colorbar : matplotlib.pyplot.colorbar
+        colorbar : matplotlib.colorbar.Colorbar
             Colorbar to go with the image.
 
         Example
