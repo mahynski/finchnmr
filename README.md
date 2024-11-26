@@ -1,6 +1,6 @@
 ![Workflow](https://github.com/mahynski/finchnmr/actions/workflows/python-app.yml/badge.svg?branch=main)
 [![Documentation Status](https://readthedocs.org/projects/finchnmr/badge/?version=latest)](https://finchnmr.readthedocs.io/en/latest/?badge=latest)
-[![codecov](https://codecov.io/gh/mahynski/finchnmr/branch/main/graph/badge.svg?token=YSLBQ33C7F)](https://codecov.io/gh/mahynski/finchnmr)
+[![codecov](https://codecov.io/github/mahynski/finchnmr/graph/badge.svg?token=DsrQIbklpB)](https://codecov.io/github/mahynski/finchnmr)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![DOI](https://zenodo.org/badge/331207062.svg)](https://zenodo.org/badge/latestdoi/331207062)
 <!--[![DOI](https://zenodo.org/badge/{github_id}.svg)](https://zenodo.org/badge/latestdoi/{github_id})-->
