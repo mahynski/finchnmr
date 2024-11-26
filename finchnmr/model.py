@@ -131,6 +131,7 @@ def optimize_models(
 def plot_stacked_importances(
     optimized_models: list[Any],
     norm: Union[str, None] = None,
+    figsize: Union[tuple[int, int], None] = None,
     **kwargs: Any,
 ) -> tuple["matplotlib.image.AxesImage", "matplotlib.pyplot.colorbar"]:
     """
@@ -162,7 +163,7 @@ def plot_stacked_importances(
     """
     imp_list = [m.importances() for m in optimized_models]
     imps_array = np.stack(imp_list)
-    _, ax = plt.subplots()
+    _, ax = plt.subplots(figsize=figsize)
 
     image = ax.imshow(imps_array.T, norm=norm, **kwargs)
     colorbar = plt.colorbar(image, ax=ax)
@@ -295,11 +296,37 @@ class Analysis:
 
         return axes
 
+    def build_residual(self) -> "substance.Substance":
+        """
+        Create a substance whose spectrum is comprised of the residual (true spectrum - model).
+
+        Returns
+        -------
+        residual : substance.Substance
+            Artificial substance whose spectrum is the residual.
+        """
+        target = self._model.target()
+        reconstructed = self._model.reconstruct()
+
+        residual = copy.deepcopy(
+            self._model.target()
+        )  # Create a new copy of the target as a baseline
+        residual._set_data(target.data - reconstructed.data)
+
+        return residual
+
     def plot_residual(
-        self,
+        self, **kwargs
     ) -> tuple["matplotlib.image.AxesImage", "matplotlib.pyplot.colorbar"]:
         """
         Plot the residual (target - reconstructed) spectrum.
+
+        An artificial substance is created representing the residual (see `build_residual`).  This is what is plotted, so it may be manipulated accordingly.
+
+        Parameters
+        ----------
+        kwargs : dict, optional(default=None)
+            Keyword arguments for `substance.Substance.plot`.
 
         Returns
         -------
@@ -308,16 +335,15 @@ class Analysis:
 
         colorbar : matplotlib.pyplot.colorbar
             Colorbar to go with the image.
+
+        Example
+        -------
+        >>> a = Analysis(...)
+        >>> a.plot_residual(absolute_values=True)
         """
-        target = self._model.target()
-        reconstructed = self._model.reconstruct()
+        residual = self.build_residual()
 
-        fake = (
-            self._model.target()
-        )  # Create a new copy of the target as a baseline
-        fake._set_data(target.data - reconstructed.data)
-
-        image, colorbar = fake.plot()
+        image, colorbar = residual.plot(**kwargs)
         plt.gca().set_title("Target - Reconstructed")
 
         return image, colorbar
