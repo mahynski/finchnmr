@@ -40,6 +40,8 @@ dependencies = [
     "pytest>=7.4.0",
     "ipython<=8.21",
     "ipykernel",
+    "nbformat>=4.2.0", # For plotly rendering in jupyter
+    "plotly>=5.24.1",
     "mypy",
     "sphinx"
 ]

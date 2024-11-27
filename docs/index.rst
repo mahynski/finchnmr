@@ -33,4 +33,3 @@ License Information
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-

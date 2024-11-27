@@ -12,6 +12,7 @@ import skimage
 import matplotlib.pyplot as plt
 import nmrglue as ng
 import numpy as np
+import plotly.express as px
 import scipy.interpolate as spint
 
 from numpy.typing import NDArray
@@ -418,53 +419,88 @@ class Substance:
         ax: Union["matplotlib.pyplot.Axes", None] = None,
         cmap="RdBu",
         absolute_values=False,
-    ) -> tuple["matplotlib.image.AxesImage", "matplotlib.colorbar.Colorbar"]:
+        backend: str = "mpl",
+    ):
         """
         Plot a single HSQC NMR spectrum.
 
         Parameters
         ----------
         norm : str or matplotlib.colors.Normalize, optional(default=None)
-            The normalization method used to scale data to the [0, 1] range before mapping to colors using `cmap`.  If `None`, a `matplotlib.colors.SymLogNorm` is used.
+            The normalization method used to scale data to the [0, 1] range before mapping to colors using `cmap`.  If `None`, a `matplotlib.colors.SymLogNorm` is used. This is currently only supported for the matplotlib backend.
 
         ax : matplotlib.pyplot.Axes, optional(default=None)
-            Axes to plot the image on.
+            Axes to plot the image on. This is currently only supported for the matplotlib backend.
 
         cmap : str, optional(default='RdBu')
-            The `matplotlib.colors.Colormap` instance or registered colormap name used to map scalar data to colors.
+            The `matplotlib.colors.Colormap` instance or registered colormap name used to map scalar data to colors.  String names are largely similar between the plotting backends and can usually be used interchangeably.
 
         absolute_values : bool, optional(default=False)
             Whether to plot the absolute values of the data (intensities).
 
+        backend : str, optional(default='mpl')
+            Plotting library to use; the default 'mpl' uses matplotlib and is not interactive, while 'plotly' will yield interactive plots.
+
         Returns
         -------
-        image : matplotlib.image.AxesImage
-            HSQC NMR spectrum as an image.
+        if backend == 'mpl':
 
-        colorbar : matplotlib.pyplot.colorbar
-            Colorbar to go with the image.
+            image : matplotlib.image.AxesImage
+                HSQC NMR spectrum as an image.
+
+            colorbar : matplotlib.pyplot.colorbar
+                Colorbar to go with the image.
+
+        if backend == 'plotly':
+
+            image : plotly.graph_objs._figure.Figure
+                HSQC NMR spectrum as an image.
         """
-        if ax is None:
-            _, ax = plt.subplots()
+        if backend == "mpl":
+            if ax is None:
+                _, ax = plt.subplots()
 
-        if norm is None:
-            norm = matplotlib.colors.SymLogNorm(
-                linthresh=np.max(np.abs(self._data)) / 100
+            if norm is None:
+                norm = matplotlib.colors.SymLogNorm(
+                    linthresh=np.max(np.abs(self._data)) / 100
+                )
+
+            image = ax.imshow(
+                self._data if not absolute_values else np.abs(self._data),
+                cmap=cmap,
+                aspect="auto",
+                norm=norm,
+                extent=self._extent,
+                origin="lower",
             )
+            ax.set_xlabel(r"$\omega_2-^1$H (ppm)")
+            ax.set_ylabel(r"$\omega_1-^{13}$C (ppm)")
 
-        image = ax.imshow(
-            self._data if not absolute_values else np.abs(self._data),
-            cmap=cmap,
-            aspect="auto",
-            norm=norm,
-            extent=self._extent,
-            origin="lower",
-        )
+            colorbar = plt.colorbar(image, ax=ax)
+            colorbar.set_label("Intensity")
 
-        colorbar = plt.colorbar(image, ax=ax)
-        colorbar.set_label("Intensity")
-        
-        if self._name != "":
             plt.gca().set_title(self._name)
 
-        return image, colorbar
+            return image, colorbar
+        elif backend == "plotly":
+            image = px.imshow(
+                self._data if not absolute_values else np.abs(self._data),
+                x=self._uc1_scale,
+                y=self._uc0_scale,
+                text_auto=False,
+                aspect="auto",
+                origin="upper",
+                color_continuous_scale=cmap,
+                title=self._name,
+            )
+            image.update_xaxes(autorange="reversed")
+            image.update_layout(xaxis_title=r"$\omega_2-^1{\rm H~(ppm)}$")
+            image.update_layout(yaxis_title=r"$\omega_1-^{13}{\rm C~(ppm)}$")
+            image.update_layout(coloraxis_colorbar=dict(title="Intensity"))
+            image.update_traces(
+                hovertemplate="x: %{x}<br>y: %{y}<br>Intensity: %{z}"
+            )
+
+            return image
+        else:
+            raise ValueError(f"Unrecognized backend {backend}")
