@@ -28,49 +28,7 @@ with st.sidebar:
     
 st.header("Analyze an HSQC NMR Spectra with FINCHnmr")
 
-st.markdown('''
-The directory structure should look something like this:
-
-experiment-42.zip
-|    acqu  
-|    acqu2  
-|    acqu2s  
-|    acqus  
-|    audita.txt  
-|    cpdprg2  
-|    format.temp  
-|    fq1list  
-|
-----pdata  
-|   |
-|   ----1
-|       |    2ii  
-|       |    2ir  
-|       |    2ri  
-|       |    2rr  
-|       |    assocs  
-|       |    auditp.txt  
-|       |    clevels  
-|       |    curdat2  
-|       |    outd  
-|       |    proc  
-|       |    proc2  
-|       |    proc2s  
-|       |    procs  
-|       |    thumb.png 
-|       |    title
-|    prosol_History  
-|    pulseprogram  
-|    scon2  
-|    ser  
-|    specpar  
-|    spnam14  
-|    spnam3  
-|    spnam31  
-|    spnam7  
-|    uxnmr.info  
-|    uxnmr.par
-''')
+st.text("The directory structure should look something like this:\n\nexperiment-42.zip\n|    acqu\n|    acqu2\n|    acqu2s\n|    acqus\n|    audita.txt\n|    cpdprg2\n|    format.temp\n|    fq1list\n|\n----pdata\n|   |\n|   ----1\n|       |    2ii\n|       |    2ir\n|       |    2ri\n|       |    2rr\n|       |    assocs\n  |       |    auditp.txt\n  |       |    clevels\n|       |    curdat2\n|       |    outd\n|       |    proc\n|       |    proc2\n |       |    proc2s\n |       |    procs\n|       |    thumb.png\n|       |    title\n|    prosol_History\n |    pulseprogram\n|    scon2\n|    ser\n|    specpar\n|    spnam14\n|    spnam3\n|    spnam31\n |    spnam7\n|    uxnmr.info\n|    uxnmr.par\n")
 
 uploaded_file = st.file_uploader(
     label="Upload a directory output by a Bruker HSQC NMR instrument to start. This should be provided as .zip file.",
