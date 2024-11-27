@@ -1,3 +1,2 @@
-bokeh==2.4.3 # This is for bokeh / streamlit compatibility
 git+https://github.com/mahynski/finchnmr@main
 streamlit-extras
