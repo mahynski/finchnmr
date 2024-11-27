@@ -1,7 +1,7 @@
 """
 Functions for defining a substance measured with HSQC NMR.
 
-Authors: David A. Sheen, Nathan A. Mahynski
+Authors: Nathan A. Mahynski, David A. Sheen
 """
 import copy
 import itertools
@@ -17,7 +17,6 @@ import scipy.interpolate as spint
 from numpy.typing import NDArray
 from typing import Any, Union, ClassVar, Literal
 
-# Turn warnings from bruker.guess_udic into errors
 import warnings
 
 
@@ -464,5 +463,8 @@ class Substance:
 
         colorbar = plt.colorbar(image, ax=ax)
         colorbar.set_label("Intensity")
+        
+        if self._name != "":
+            plt.gca().set_title(self._name)
 
         return image, colorbar
