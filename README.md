@@ -10,7 +10,7 @@
 [![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
 -->
 
-FINCHnmr : [FI]tti[N]g [C]13 [H]1 HSQC [NMR]
+FINCHnmr : [FI]tti[N]g 13[C] 1[H] HSQC [NMR]
 ===
 
 <img src="https://raw.githubusercontent.com/mahynski/finchnmr/main/docs/_static/logo_small.png" height="100" align="left" />
