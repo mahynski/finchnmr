@@ -3,6 +3,7 @@ Interactive demonstration of FINCHnmr.
 
 Author: Nathan A. Mahynski
 """
+import finchnmr
 import os
 import zipfile
 
@@ -11,6 +12,8 @@ import streamlit as st
 from streamlit_extras.add_vertical_space import add_vertical_space
 
 st.set_page_config(layout="wide")
+
+UPLOAD_FOLDER = "uploaded_nmr"
 
 with st.sidebar:
     st.image("docs/_static/logo_small.png")
@@ -44,6 +47,15 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file is not None:
     with zipfile.ZipFile(uploaded_file, 'r') as z:
-        z.extractall('./uploaded_nmr/')
+        z.extractall(f'./{UPLOAD_FOLDER}/')
             
-    st.write(os.listdir('./uploaded_nmr/'))
+    head = os.listdir(f'./{UPLOAD_FOLDER}/')
+    if len(head) != 1:
+        raise Exception("Uploaded zip file should contain exactly 1 folder.")
+
+    substance = finchnmr.substance.Substance(
+        pathname=os.path.abspath(f'./{UPLOAD_FOLDER}/{head}/pdata/1'),
+        name=head,
+        warning='default'
+    )
+
