@@ -48,4 +48,4 @@ if uploaded_file is not None:
         with zipfile.ZipFile(uploaded_file, 'r') as z:
             z.extractall('./uploaded/')
             
-    st.write(os.listdir('./'))
+    st.write(os.listdir('./uploaded/'))
