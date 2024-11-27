@@ -19,6 +19,24 @@ st.set_page_config(layout="wide")
 
 UPLOAD_FOLDER = "uploaded_nmr"
 
+@st.cache_data
+def build_library():
+    nmr_dataset = load_dataset(
+        "mahynski/bmrb-hsqc-nmr-1H13C",
+        split="train",
+        token=st.secrets["HF_TOKEN"],
+        trust_remote_code=True,
+    )
+    substances = [
+        finchnmr.substance.Substance(
+            pathname=d['pathname'],
+            name=d['name'],
+            warning='ignore'
+        ) for d in nmr_dataset
+    ]
+    lib = finchnmr.library.Library(substances)
+    return lib
+
 with st.sidebar:
     st.image("docs/_static/logo_small.png")
 #     st.title('FINCHnmr: [FI]tti[N]g 13[C] 1[H] HSQC NMR')
@@ -81,24 +99,12 @@ if uploaded_file is not None:
 
         st.plotly_chart(target.plot(absolute_values=True, backend='plotly', cmap=cmap_option))
 
+    # Need to cache library construction and model building
+        
     with col2_:
         # Load reference library from HF
         with st.spinner(text="Building HSQC Library..."):
-            HF_TOKEN = st.secrets["HF_TOKEN"]
-            nmr_dataset = load_dataset(
-              "mahynski/bmrb-hsqc-nmr-1H13C",
-              split="train",
-              token=HF_TOKEN,
-              trust_remote_code=True,
-            )
-            substances = [
-                finchnmr.substance.Substance(
-                    pathname=d['pathname'],
-                    name=d['name'],
-                    warning='ignore'
-                ) for d in nmr_dataset
-            ]
-            lib = finchnmr.library.Library(substances)
+            lib = build_library()
         st.success("Done!")
     
         # Optimize a model
