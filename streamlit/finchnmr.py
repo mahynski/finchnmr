@@ -28,7 +28,7 @@ with st.sidebar:
     
 st.header("Analyze an HSQC NMR Spectra with FINCHnmr")
 
-st.text("The directory structure should look something like this:\n\nexperiment-42.zip\n|\t\tacqu\n|    acqu2\n|    acqu2s\n|    acqus\n|    audita.txt\n|    cpdprg2\n|    format.temp\n|    fq1list\n|\n----pdata\n|   |\n|   ----1\n|       |    2ii\n|       |    2ir\n|       |    2ri\n|       |    2rr\n|       |    assocs\n  |       |    auditp.txt\n  |       |    clevels\n|       |    curdat2\n|       |    outd\n|       |    proc\n|       |    proc2\n |       |    proc2s\n |       |    procs\n|       |    thumb.png\n|       |    title\n|    prosol_History\n |    pulseprogram\n|    scon2\n|    ser\n|    specpar\n|    spnam14\n|    spnam3\n|    spnam31\n |    spnam7\n|    uxnmr.info\n|    uxnmr.par\n")
+# st.text("The directory structure should look something like this:\n\nexperiment-42.zip\n|\t\tacqu\n|    acqu2\n|    acqu2s\n|    acqus\n|    audita.txt\n|    cpdprg2\n|    format.temp\n|    fq1list\n|\n----pdata\n|   |\n|   ----1\n|       |    2ii\n|       |    2ir\n|       |    2ri\n|       |    2rr\n|       |    assocs\n  |       |    auditp.txt\n  |       |    clevels\n|       |    curdat2\n|       |    outd\n|       |    proc\n|       |    proc2\n |       |    proc2s\n |       |    procs\n|       |    thumb.png\n|       |    title\n|    prosol_History\n |    pulseprogram\n|    scon2\n|    ser\n|    specpar\n|    spnam14\n|    spnam3\n|    spnam31\n |    spnam7\n|    uxnmr.info\n|    uxnmr.par\n")
 
 uploaded_file = st.file_uploader(
     label="Upload a directory output by a Bruker HSQC NMR instrument to start. This should be provided as .zip file.",
@@ -40,9 +40,8 @@ uploaded_file = st.file_uploader(
     label_visibility="visible"
 )
 
-if len(file_uploaded) > 0:
-    for file in file_uploaded:
-        # If zip file, extract contents
-        if file.type == "application/zip":
-            with zipfile.ZipFile(file, 'r') as z:
-                z.extractall('.')
+if uploaded_file is not None:
+    # If zip file, extract contents
+    if file.type == "application/zip":
+        with zipfile.ZipFile(file, 'r') as z:
+            z.extractall('.')
