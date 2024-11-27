@@ -3,6 +3,8 @@ Interactive demonstration of FINCHnmr.
 
 Author: Nathan A. Mahynski
 """
+import zipfile
+
 import streamlit as st
 
 from streamlit_extras.add_vertical_space import add_vertical_space
@@ -26,6 +28,50 @@ with st.sidebar:
     
 st.header("Analyze an HSQC NMR Spectra with FINCHnmr")
 
+st.markdown('''
+The directory structure should look something like this:
+
+experiment-42.zip
+|    acqu  
+|    acqu2  
+|    acqu2s  
+|    acqus  
+|    audita.txt  
+|    cpdprg2  
+|    format.temp  
+|    fq1list  
+|
+----pdata  
+|   |
+|   ----1
+|       |    2ii  
+|       |    2ir  
+|       |    2ri  
+|       |    2rr  
+|       |    assocs  
+|       |    auditp.txt  
+|       |    clevels  
+|       |    curdat2  
+|       |    outd  
+|       |    proc  
+|       |    proc2  
+|       |    proc2s  
+|       |    procs  
+|       |    thumb.png 
+|       |    title
+|    prosol_History  
+|    pulseprogram  
+|    scon2  
+|    ser  
+|    specpar  
+|    spnam14  
+|    spnam3  
+|    spnam31  
+|    spnam7  
+|    uxnmr.info  
+|    uxnmr.par
+''')
+
 uploaded_file = st.file_uploader(
     label="Upload a directory output by a Bruker HSQC NMR instrument to start. This should be provided as .zip file.",
     type=['zip'], 
@@ -35,3 +81,10 @@ uploaded_file = st.file_uploader(
     on_change=None, 
     label_visibility="visible"
 )
+
+if len(file_uploaded) > 0:
+    for file in file_uploaded:
+        # If zip file, extract contents
+        if file.type == "application/zip":
+            with zipfile.ZipFile(file, 'r') as z:
+                z.extractall('.')
