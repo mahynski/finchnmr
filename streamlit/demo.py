@@ -58,6 +58,10 @@ if uploaded_file is not None:
     head = os.listdir(f'./{UPLOAD_FOLDER}/')
     if len(head) != 1:
         raise Exception("Uploaded zip file should contain exactly 1 folder.")
+    else:
+        head = head[0]
+        
+    st.write(os.listdir(head))
 
     # Create substance
     target = finchnmr.substance.Substance(
