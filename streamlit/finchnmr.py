@@ -9,7 +9,7 @@ import zipfile
 
 import streamlit as st
 
-from finchnmr import analysis, library, model, substance
+# import analysis, library, model, substance
 from streamlit_extras.add_vertical_space import add_vertical_space
 
 st.set_page_config(layout="wide")
@@ -54,9 +54,9 @@ if uploaded_file is not None:
     if len(head) != 1:
         raise Exception("Uploaded zip file should contain exactly 1 folder.")
 
-    substance = finchnmr.substance.Substance(
-        pathname=os.path.abspath(f'./{UPLOAD_FOLDER}/{head}/pdata/1'),
-        name=head,
-        warning='default'
-    )
+#     substance = finchnmr.substance.Substance(
+#         pathname=os.path.abspath(f'./{UPLOAD_FOLDER}/{head}/pdata/1'),
+#         name=head,
+#         warning='default'
+#     )
 
