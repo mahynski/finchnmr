@@ -8,6 +8,7 @@ import os
 import shutil
 import zipfile
 
+import numpy as np
 import streamlit as st
 
 from datasets import load_dataset
@@ -68,32 +69,38 @@ if uploaded_file is not None:
         warning='ignore'
     )
     
-    # Plot the substance with plotly
-    st.plotly_chart(target.plot(absolute_values=True, backend='plotly', cmap='Reds'))
-
-    # Load reference library from HF
-    HF_TOKEN = st.secrets["HF_TOKEN"]
-    nmr_dataset = load_dataset(
-      "mahynski/bmrb-hsqc-nmr-1H13C",
-      split="train",
-      token=HF_TOKEN,
-      trust_remote_code=True,
-    )
-    substances = [
-        finchnmr.substance.Substance(
-            pathname=d['pathname'],
-            name=d['name'],
-            warning='ignore'
-        ) for d in nmr_dataset
-    ]
-    lib = finchnmr.library.Library(substances)
+    col1_, col2_ = st.columns(2)
     
-    # Optimize a model
-    optimized_models, analyses = finchnmr.model.optimize_models(
-        targets=[target],
-        nmr_library=lib,
-        nmr_model=finchnmr.model.LASSO, # Use a Lasso model to obtain a sparse solution
-        param_grid={'alpha': np.logspace(-16, 0, 10)}, # Select a range of alpha values to examine sparsity
-        model_kw={'max_iter':1000, 'selection':'cyclic', 'random_state':42, 'tol':0.0001} # These are default, but you can adjust
-    )
+    with col1_:
+        # Plot the substance with plotly
+        st.plotly_chart(target.plot(absolute_values=True, backend='plotly', cmap='Reds'))
+
+    with col2_:
+        # Load reference library from HF
+        with st.spinner(text="Building HSQC Library..."):
+            HF_TOKEN = st.secrets["HF_TOKEN"]
+            nmr_dataset = load_dataset(
+              "mahynski/bmrb-hsqc-nmr-1H13C",
+              split="train",
+              token=HF_TOKEN,
+              trust_remote_code=True,
+            )
+            substances = [
+                finchnmr.substance.Substance(
+                    pathname=d['pathname'],
+                    name=d['name'],
+                    warning='ignore'
+                ) for d in nmr_dataset
+            ]
+            lib = finchnmr.library.Library(substances)
+        st.success("Done!")
+    
+        # Optimize a model
+#         optimized_models, analyses = finchnmr.model.optimize_models(
+#             targets=[target],
+#             nmr_library=lib,
+#             nmr_model=finchnmr.model.LASSO, # Use a Lasso model to obtain a sparse solution
+#             param_grid={'alpha': np.logspace(-16, 0, 10)}, # Select a range of alpha values to examine sparsity
+#             model_kw={'max_iter':1000, 'selection':'cyclic', 'random_state':42, 'tol':0.0001} # These are default, but you can adjust
+#         )
 
