@@ -46,6 +46,6 @@ if uploaded_file is not None:
     # If zip file, extract contents
     if uploaded_file.type == "application/zip":
         with zipfile.ZipFile(uploaded_file, 'r') as z:
-            z.extractall('.')
+            z.extractall('./uploaded/')
             
     st.write(os.listdir('./'))
