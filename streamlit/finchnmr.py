@@ -3,6 +3,7 @@ Interactive demonstration of FINCHnmr.
 
 Author: Nathan A. Mahynski
 """
+import os
 import zipfile
 
 import streamlit as st
@@ -46,3 +47,5 @@ if uploaded_file is not None:
     if uploaded_file.type == "application/zip":
         with zipfile.ZipFile(uploaded_file, 'r') as z:
             z.extractall('.')
+            
+    os.listdir('./')
