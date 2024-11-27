@@ -39,10 +39,10 @@ def build_library():
     return lib
 
 @st.cache_data
-def build_model(target, lib):
+def build_model(_target, _lib):
     optimized_models, analyses = finchnmr.model.optimize_models(
-        targets=[target],
-        nmr_library=lib,
+        targets=[_target],
+        nmr_library=_lib,
         nmr_model=finchnmr.model.LASSO, # Use a Lasso model to obtain a sparse solution
         param_grid={'alpha': np.logspace(-16, 0, 10)}, # Select a range of alpha values to examine sparsity
         model_kw={'max_iter':1000, 'selection':'cyclic', 'random_state':42, 'tol':0.0001} # These are default, but you can adjust
