@@ -48,7 +48,7 @@ uploaded_file = st.file_uploader(
 )
 
 if uploaded_file is not None:
-    if os.path.isdir():
+    if os.path.isdir(f'./{UPLOAD_FOLDER}/'):
         shutil.rmtree(f'./{UPLOAD_FOLDER}/')
         
     with zipfile.ZipFile(uploaded_file, 'r') as z:
