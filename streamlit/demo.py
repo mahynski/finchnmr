@@ -48,6 +48,9 @@ uploaded_file = st.file_uploader(
 )
 
 if uploaded_file is not None:
+    if os.path.isdir():
+        shutil.rmtree(f'./{UPLOAD_FOLDER}/')
+        
     with zipfile.ZipFile(uploaded_file, 'r') as z:
         z.extractall(f'./{UPLOAD_FOLDER}/')
             
