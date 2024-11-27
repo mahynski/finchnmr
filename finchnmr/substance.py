@@ -465,7 +465,7 @@ class Substance:
                     linthresh=np.max(np.abs(self._data)) / 100
                 )
 
-            image = ax.imshow(
+            image_mpl = ax.imshow(
                 self._data if not absolute_values else np.abs(self._data),
                 cmap=cmap,
                 aspect="auto",
@@ -476,14 +476,14 @@ class Substance:
             ax.set_xlabel(r"$\omega_2-^1$H (ppm)")
             ax.set_ylabel(r"$\omega_1-^{13}$C (ppm)")
 
-            colorbar = plt.colorbar(image, ax=ax)
+            colorbar = plt.colorbar(image_mpl, ax=ax)
             colorbar.set_label("Intensity")
 
             plt.gca().set_title(self._name)
 
-            return image, colorbar
+            return image_mpl, colorbar
         elif backend == "plotly":
-            image = px.imshow(
+            image_plt = px.imshow(
                 self._data if not absolute_values else np.abs(self._data),
                 x=self._uc1_scale,
                 y=self._uc0_scale,
@@ -493,14 +493,14 @@ class Substance:
                 color_continuous_scale=cmap,
                 title=self._name,
             )
-            image.update_xaxes(autorange="reversed")
-            image.update_layout(xaxis_title=r"$\omega_2-^1{\rm H~(ppm)}$")
-            image.update_layout(yaxis_title=r"$\omega_1-^{13}{\rm C~(ppm)}$")
-            image.update_layout(coloraxis_colorbar=dict(title="Intensity"))
-            image.update_traces(
+            image_plt.update_xaxes(autorange="reversed")
+            image_plt.update_layout(xaxis_title=r"$\omega_2-^1{\rm H~(ppm)}$")
+            image_plt.update_layout(yaxis_title=r"$\omega_1-^{13}{\rm C~(ppm)}$")
+            image_plt.update_layout(coloraxis_colorbar=dict(title="Intensity"))
+            image_plt.update_traces(
                 hovertemplate="x: %{x}<br>y: %{y}<br>Intensity: %{z}"
             )
 
-            return image
+            return image_plt
         else:
             raise ValueError(f"Unrecognized backend {backend}")

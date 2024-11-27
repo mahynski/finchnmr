@@ -21,7 +21,7 @@ def plot_stacked_importances(
     figsize: Union[tuple[int, int], None] = None,
     backend: str = 'mpl',
     **imshow_kwargs: Any,
-) -> tuple["matplotlib.image.AxesImage", "matplotlib.colorbar.Colorbar"]:
+):
     """
     Plot the importance values in list of models.
 
@@ -66,25 +66,25 @@ def plot_stacked_importances(
     if backend == 'mpl':
         _, ax = plt.subplots(figsize=figsize)
 
-        image = ax.imshow(imps_array.T, **imshow_kwargs)
+        image_mpl = ax.imshow(imps_array.T, **imshow_kwargs)
         ax.set_xlabel('Model Index')
         ax.set_ylabel('Library Substance Index')
         
-        colorbar = plt.colorbar(image, ax=ax)
+        colorbar = plt.colorbar(image_mpl, ax=ax)
         colorbar.set_label("Importance")
 
-        return image, colorbar
+        return image_mpl, colorbar
     elif backend == 'plotly':
-        image = px.imshow(
+        image_plt = px.imshow(
             imps_array.T, 
             text_auto=False,
             aspect="auto",
             **imshow_kwargs
         )
             
-        image.update_layout(xaxis_title="Model Index")
-        image.update_layout(yaxis_title="Library Substance Index")
-        image.update_layout(
+        image_plt.update_layout(xaxis_title="Model Index")
+        image_plt.update_layout(yaxis_title="Library Substance Index")
+        image_plt.update_layout(
             coloraxis_colorbar=dict(
                 title="Importance" 
             )
@@ -95,14 +95,14 @@ def plot_stacked_importances(
         z1, z2 = np.dstack([np.indices(imps_array.T.shape)])
         customdata = np.dstack((z1, z2, names))
         
-        image.update(data=[
+        image_plt.update(data=[
             {
                 'customdata': customdata,
                 'hovertemplate': "Substance Index: %{customdata[0]}<br>Model Index: %{customdata[1]}<br>Substance: %{customdata[2]}"
             }
         ])
         
-        return image
+        return image_plt
     else:
         raise ValueError(f"Unrecognized backend {backend}")
         
