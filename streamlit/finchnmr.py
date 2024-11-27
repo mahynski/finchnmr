@@ -54,9 +54,9 @@ if uploaded_file is not None:
     if len(head) != 1:
         raise Exception("Uploaded zip file should contain exactly 1 folder.")
 
-#     substance = finchnmr.substance.Substance(
-#         pathname=os.path.abspath(f'./{UPLOAD_FOLDER}/{head}/pdata/1'),
-#         name=head,
-#         warning='default'
-#     )
+    s = finchnmr.substance.Substance(
+        pathname=os.path.abspath(f'./{UPLOAD_FOLDER}/{head}/pdata/1'),
+        name=head,
+        warning='default'
+    )
 
