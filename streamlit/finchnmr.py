@@ -12,6 +12,8 @@ from streamlit_extras.add_vertical_space import add_vertical_space
 st.set_page_config(layout="wide")
 
 with st.sidebar:
+    st.image("logo_small.png")
+    
     st.title('FINCHnmr: [FI]tti[N]g 13[C] 1[H] HSQC NMR')
     st.markdown('''
     ## About this application    
@@ -42,6 +44,6 @@ uploaded_file = st.file_uploader(
 
 if uploaded_file is not None:
     # If zip file, extract contents
-    if file.type == "application/zip":
-        with zipfile.ZipFile(file, 'r') as z:
+    if uploaded_file.type == "application/zip":
+        with zipfile.ZipFile(uploaded_file, 'r') as z:
             z.extractall('.')
