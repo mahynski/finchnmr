@@ -73,7 +73,13 @@ if uploaded_file is not None:
     
     with col1_:
         # Plot the substance with plotly
-        st.plotly_chart(target.plot(absolute_values=True, backend='plotly', cmap='Reds'))
+        cmap_option = st.selectbox(
+            "Colormap",
+            ("Reds", "Blues", "Viridis", "Plasma", "RdBu"),
+            index=0,
+        )
+
+        st.plotly_chart(target.plot(absolute_values=True, backend='plotly', cmap=cmap_option))
 
     with col2_:
         # Load reference library from HF
