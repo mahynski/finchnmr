@@ -49,3 +49,5 @@ if uploaded_file is not None:
             z.extractall('.')
             
     st.write(os.listdir('./'))
+    st.write(os.listdir('./streamlit'))
+    st.write(os.listdir('./finchnmr'))
