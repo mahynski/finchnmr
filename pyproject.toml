@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 [project]
 dynamic = ["version"]
 name = "finchnmr"
-description="My Awesome New Package"
+description="[FI]tti[N]g 13[C] 1[H] HSQC [NMR]"
 authors = [
     {name = "Nathan A. Mahynski", email = "nathan.mahynski@gmail.com"},
     {name = "David A. Sheen", email = "david.sheen@nist.gov"}
