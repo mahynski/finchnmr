@@ -61,9 +61,6 @@ if uploaded_file is not None:
     else:
         head = head[0]
         
-#     st.write(os.listdir('./uploaded_nmr/New folder/'))
-#     st.write(os.path.abspath(f'./{UPLOAD_FOLDER}/{head}/pdata/1'))
-
     # Create substance
     target = finchnmr.substance.Substance(
         pathname=os.path.abspath(f'./{UPLOAD_FOLDER}/{head}/pdata/1'),
@@ -75,7 +72,7 @@ if uploaded_file is not None:
     st.plotly_chart(target.plot(absolute_values=True, backend='plotly', cmap='Reds'))
 
     # Load reference library from HF
-    HF_TOKEN = st.secrets("HF_TOKEN")
+    HF_TOKEN = st.secrets["HF_TOKEN"]
     nmr_dataset = load_dataset(
       "mahynski/bmrb-hsqc-nmr-1H13C",
       split="train",
