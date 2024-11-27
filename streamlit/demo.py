@@ -5,6 +5,7 @@ Author: Nathan A. Mahynski
 """
 import finchnmr
 import os
+import shutil
 import zipfile
 
 import streamlit as st
