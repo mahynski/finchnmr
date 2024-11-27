@@ -61,8 +61,8 @@ if uploaded_file is not None:
     else:
         head = head[0]
         
-    st.write(os.listdir('./uploaded_nmr/New folder/'))
-    st.write(os.path.abspath(f'./{UPLOAD_FOLDER}/{head}/pdata/1'))
+#     st.write(os.listdir('./uploaded_nmr/New folder/'))
+#     st.write(os.path.abspath(f'./{UPLOAD_FOLDER}/{head}/pdata/1'))
 
     # Create substance
     target = finchnmr.substance.Substance(
