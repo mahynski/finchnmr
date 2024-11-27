@@ -9,8 +9,8 @@ import zipfile
 
 import streamlit as st
 
-from finchnmr import substance
-# import analysis, library, model, substance
+from datasets import load_dataset
+# from finchnmr import analysis, library, model, substance
 from streamlit_extras.add_vertical_space import add_vertical_space
 
 st.set_page_config(layout="wide")
@@ -55,9 +55,39 @@ if uploaded_file is not None:
     if len(head) != 1:
         raise Exception("Uploaded zip file should contain exactly 1 folder.")
 
-    s = finchnmr.substance.Substance(
+    # Create substance
+    target = finchnmr.substance.Substance(
         pathname=os.path.abspath(f'./{UPLOAD_FOLDER}/{head}/pdata/1'),
         name=head,
-        warning='default'
+        warning='ignore'
+    )
+    
+    # Plot the substance with plotly
+    st.plotly_chart(target.plot(absolute_values=True, backend='plotly', cmap='Reds'))
+
+    # Load reference library from HF
+    HF_TOKEN = st.secrets("HF_TOKEN")
+    nmr_dataset = load_dataset(
+      "mahynski/bmrb-hsqc-nmr-1H13C",
+      split="train",
+      token=HF_TOKEN,
+      trust_remote_code=True,
+    )
+    substances = [
+        finchnmr.substance.Substance(
+            pathname=d['pathname'],
+            name=d['name'],
+            warning='ignore'
+        ) for d in nmr_dataset
+    ]
+    lib = finchnmr.library.Library(substances)
+    
+    # Optimize a model
+    optimized_models, analyses = finchnmr.model.optimize_models(
+        targets=[target],
+        nmr_library=lib,
+        nmr_model=finchnmr.model.LASSO, # Use a Lasso model to obtain a sparse solution
+        param_grid={'alpha': np.logspace(-16, 0, 10)}, # Select a range of alpha values to examine sparsity
+        model_kw={'max_iter':1000, 'selection':'cyclic', 'random_state':42, 'tol':0.0001} # These are default, but you can adjust
     )
 
