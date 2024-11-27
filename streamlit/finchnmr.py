@@ -13,7 +13,7 @@ from streamlit_extras.add_vertical_space import add_vertical_space
 st.set_page_config(layout="wide")
 
 with st.sidebar:
-    st.image("streamlit/logo_small.png")
+    st.image("docs/_static/logo_small.png")
 #     st.title('FINCHnmr: [FI]tti[N]g 13[C] 1[H] HSQC NMR')
     st.markdown('''
     ## About this application    
