@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 import nmrglue as ng
 import numpy as np
 import plotly.express as px
-import scipy.interpolate as spint
 
 from numpy.typing import NDArray
 from typing import Any, Union, ClassVar, Literal
@@ -29,7 +28,6 @@ class Substance:
     _extent: ClassVar[tuple[float, float, float, float]]
     _uc0_scale: ClassVar[NDArray[np.floating]]
     _uc1_scale: ClassVar[NDArray[np.floating]]
-    _interp_fcn: ClassVar[Any]
     _window_size: ClassVar[int]
     _window_size_y: ClassVar[Union[int, None]]
 
@@ -89,11 +87,6 @@ class Substance:
     def scale(self) -> tuple:
         """Return the grid points the spectrum is reported on."""
         return (self._uc0_scale, self._uc1_scale)
-
-    @property
-    def interp_fcn(self) -> Any:
-        """Return the interpolation function."""
-        return self._interp_fcn
 
     def flatten(self) -> NDArray[np.floating]:
         """Return a flattened (1D) version of the data."""
@@ -252,17 +245,6 @@ class Substance:
         )  # Limits are chosen so ppm goes in the correct direction
         setattr(self, "_uc0_scale", uc0_scale)
         setattr(self, "_uc1_scale", uc1_scale)
-        setattr(
-            self,
-            "_interp_fcn",
-            spint.RegularGridInterpolator(
-                (self._uc0_scale, self._uc1_scale),
-                self._data,
-                fill_value=0,
-                bounds_error=False,
-                method="cubic",
-            ),
-        )
         setattr(self, "_name", name)
 
         return

@@ -32,7 +32,6 @@ dependencies = [
     "tqdm>=4.66.1",
     "numpy >= 1.23, <2.0.0",
     "scikit-image==0.24.0",
-    "scipy==1.9.3", #11.1",
     "scikit-learn",
     "matplotlib>=3.7.2",
     "pandas==2.2",
