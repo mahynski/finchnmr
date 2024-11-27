@@ -15,7 +15,7 @@ FINCHnmr : [FI]tti[N]g 13[C] 1[H] HSQC [NMR]
 
 <img src="https://raw.githubusercontent.com/mahynski/finchnmr/main/docs/_static/logo_small.png" height="100" align="left" />
 
-FINCHnmr is lightweight toolkit for fitting 2D [heteronuclear single-quantum coherence (HSQC) nuclear magnetic resonance (NMR)](https://en.wikipedia.org/wiki/Heteronuclear_single_quantum_coherence_spectroscopy) data to a known library of substances.  This predicts the presence and relative concentration of these compounds, and the residual (error) can be interpreted as the sum of the remaining unknown compounds present.  For a live demonstration, visit [https://finchnmr-demo.streamlit.app/](https://finchnmr-demo.streamlit.app/). Although originally designed to work with (1H-13C) data, FINCHnmr will work with any 2D NMR as long as the library used matches the sample being predicted / analyzed.
+FINCHnmr is lightweight toolkit for fitting 2D heteronuclear single-quantum coherence nuclear magnetic resonance [(HSQC NMR)](https://en.wikipedia.org/wiki/Heteronuclear_single_quantum_coherence_spectroscopy) data to a known library of substances.  This predicts the presence and relative concentration of these compounds, and the residual (error) can be interpreted as the sum of the remaining unknown compounds present.  For a live demonstration, visit [https://finchnmr-demo.streamlit.app/](https://finchnmr-demo.streamlit.app/). Although originally designed to work with (1H-13C) data, FINCHnmr will work with any 2D NMR as long as the library used matches the sample being predicted / analyzed.
 <br/>
 
 There are two approaches to generating the spectral libraries.  Both methods are demonstrated in the documentation.
