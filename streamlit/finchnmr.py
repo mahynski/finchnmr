@@ -9,7 +9,7 @@ import zipfile
 
 import streamlit as st
 
-from finchnmr import substance
+from finchnmr import analysis, library, model, substance
 from streamlit_extras.add_vertical_space import add_vertical_space
 
 st.set_page_config(layout="wide")
