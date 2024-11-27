@@ -21,6 +21,7 @@ UPLOAD_FOLDER = "uploaded_nmr"
 
 @st.cache_data
 def build_library():
+    """Build NMR library from HF."""
     nmr_dataset = load_dataset(
         "mahynski/bmrb-hsqc-nmr-1H13C",
         split="train",
@@ -37,6 +38,17 @@ def build_library():
     lib = finchnmr.library.Library(substances)
     return lib
 
+@st.cache_data
+def build_model(target, lib):
+    optimized_models, analyses = finchnmr.model.optimize_models(
+        targets=[target],
+        nmr_library=lib,
+        nmr_model=finchnmr.model.LASSO, # Use a Lasso model to obtain a sparse solution
+        param_grid={'alpha': np.logspace(-16, 0, 10)}, # Select a range of alpha values to examine sparsity
+        model_kw={'max_iter':1000, 'selection':'cyclic', 'random_state':42, 'tol':0.0001} # These are default, but you can adjust
+    )
+    return optimized_models, analyses
+    
 with st.sidebar:
     st.image("docs/_static/logo_small.png")
 #     st.title('FINCHnmr: [FI]tti[N]g 13[C] 1[H] HSQC NMR')
@@ -105,14 +117,9 @@ if uploaded_file is not None:
         # Load reference library from HF
         with st.spinner(text="Building HSQC Library..."):
             lib = build_library()
-        st.success("Done!")
+        st.success("Library has been built!")
     
         # Optimize a model
-#         optimized_models, analyses = finchnmr.model.optimize_models(
-#             targets=[target],
-#             nmr_library=lib,
-#             nmr_model=finchnmr.model.LASSO, # Use a Lasso model to obtain a sparse solution
-#             param_grid={'alpha': np.logspace(-16, 0, 10)}, # Select a range of alpha values to examine sparsity
-#             model_kw={'max_iter':1000, 'selection':'cyclic', 'random_state':42, 'tol':0.0001} # These are default, but you can adjust
-#         )
-
+        with st.spinner(text="Building Lasso model..."):
+            optimized_models, analyses = build_model(target, lib)
+        st.success("Model finished!")
