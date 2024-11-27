@@ -43,9 +43,7 @@ uploaded_file = st.file_uploader(
 )
 
 if uploaded_file is not None:
-    # If zip file, extract contents
-#     if uploaded_file.type == "application/zip":
     with zipfile.ZipFile(uploaded_file, 'r') as z:
-        z.extractall('./uploaded/')
+        z.extractall('./uploaded_nmr/')
             
-    st.write(os.listdir('./uploaded/'))
+    st.write(os.listdir('./uploaded_nmr/'))
