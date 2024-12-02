@@ -226,8 +226,8 @@ if uploaded_file is not None:
                     max_value=max_n_,
                     step=1
                 )
-                st.pyplot(
-                    analysis_.plot_top_importances(k=n_imp_, by_name=True).get_figure(),
+                st.plotly_chart(
+                    analysis_.plot_top_importances(k=n_imp_, by_name=True, backend='plotly'),
                     use_container_width=True
                 )
 
