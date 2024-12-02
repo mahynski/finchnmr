@@ -402,6 +402,7 @@ class Substance:
         cmap="RdBu",
         absolute_values=False,
         backend: str = "mpl",
+        title: Union[str, None] = None
     ):
         """
         Plot a single HSQC NMR spectrum.
@@ -422,6 +423,9 @@ class Substance:
 
         backend : str, optional(default='mpl')
             Plotting library to use; the default 'mpl' uses matplotlib and is not interactive, while 'plotly' will yield interactive plots.
+
+        title : str, optional(default=None)
+            Optional title to put on plot; otherwise this defaults to the substance's name.
 
         Returns
         -------
@@ -461,7 +465,7 @@ class Substance:
             colorbar = plt.colorbar(image_mpl, ax=ax)
             colorbar.set_label("Intensity")
 
-            plt.gca().set_title(self._name)
+            plt.gca().set_title(self._name if title is None else title)
 
             return image_mpl, colorbar
         elif backend == "plotly":
@@ -473,7 +477,7 @@ class Substance:
                 aspect="auto",
                 origin="upper",
                 color_continuous_scale=cmap,
-                title=self._name,
+                title=self._name if title is None else title,
             )
             image_plt.update_xaxes(autorange="reversed")
             image_plt.update_layout(xaxis_title=r"$\omega_2-^1{\rm H~(ppm)}$")
