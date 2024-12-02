@@ -8,6 +8,7 @@ import matplotlib
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import plotly.express as px
 
 from . import substance
@@ -125,7 +126,8 @@ class Analysis:
 
     def get_top_substances(
             self,
-            k: int = 5
+            k: int = 5,
+            index: bool = False
     ) -> tuple[list["substance.Substance"], list[float]]:
         """
         Retrieve the most important substances to the model.
@@ -133,16 +135,22 @@ class Analysis:
         Parameters
         ----------
         k : int, optional(default=5)
-            Number of most important spectra to retrieve.
+            Number of most important spectra to retrieve. If -1 then get them all.
         
+        index : bool, optional(default=False)
+            If True, then return list of substance indices in the model library not the substance itself.
+
         Returns
         -------
-        top_substances : list(Substance)
-            The most important substances, sorted from highest to lowest by the absolute value of their importance.
+        top_substances : list(Substance) of list(int)
+            The most important substances, sorted from highest to lowest by the absolute value of their importance. If `index=True` then this is a list of integers corresponding to the index of the substance in the model's library.
 
         top_importances : list(float)
             Importance of each substance, sorted from highest to lowest by the absolute value of their importance.
         """
+        if k == -1:
+            k = len(self._model.importances())
+
         top_substances = []
         top_importances = []
         for i, (idx_, importances_) in enumerate(
@@ -152,7 +160,10 @@ class Analysis:
                 reverse=True,
             )[:k]
         ):
-            top_substances.append(self._model._nmr_library.substance_by_index(idx_))
+            if index:
+                top_substances.append(idx_)
+            else:
+                top_substances.append(self._model._nmr_library.substance_by_index(idx_))
             top_importances.append(importances_)
         
         return top_substances, top_importances
@@ -162,9 +173,11 @@ class Analysis:
         k: int = 5,
         plot_width: int = 3,
         figsize: Union[tuple[int, int], None] = (10, 5),
-    ):
+    ) -> NDArray["matplotlib.pyplot.Axes"]:
         """
-        Plot the HSQC NMR spectra that are the most importance to the model.
+        Plot the HSQC NMR spectra that are the most importance to the model using matplotlib.
+
+        To visualize these results using another plotting backend, such as plotly, use `.get_top_substances` and create subplots as desired.
 
         Parameters
         ----------
@@ -194,7 +207,7 @@ class Analysis:
 
         # Plot the NMR spectra
         top_substances, top_importances = self.get_top_substances(k=k)
-        for s_, importance_ in zip(top_substances, top_importances):
+        for i, (s_, importance_) in enumerate(zip(top_substances, top_importances)):
             s_.plot(ax=axes[i])
             axes[i].set_title(
                 s_.name + "\nI = {}".format("%.4f" % importance_)
@@ -211,7 +224,8 @@ class Analysis:
         k: int = 5,
         by_name: bool = False,
         figsize: Union[tuple[int, int], None] = None,
-    ) -> "matplotlib.pyplot.Axes":
+        backend: str = 'mpl'
+    ):
         """
         Plot the importances of the top substances in the model.
 
@@ -226,39 +240,71 @@ class Analysis:
         figsize : tuple(int, int), optional(default=None))
             Size of final figure.
 
+        backend : str, optional(default='mpl')
+            Plotting library to use; the default 'mpl' uses matplotlib and is not interactive, while 'plotly' will yield interactive plots.
+
         Returns
         -------
-        axes : matplotlib.pyplot.Axes
-            Horizontal bar chart the importances are plotted on in descending order.
+        if backend == 'mpl':
+        
+            axes : matplotlib.pyplot.Axes
+                Horizontal bar chart the importances are plotted on in descending order.
+        
+        if backend == 'plotly':
+        
+            figure : plotly.graph_objs._figure.Figure
+                Horizontal bar chart the importances are plotted on in descending order.
         """
         if k == -1:
             k = len(self._model.importances())
 
-        sorted_importances = sorted(
-            list(enumerate(self._model.importances())),
-            key=lambda x: np.abs(x[1]),
-            reverse=True,
-        )[:k]
+        # sorted_importances = sorted(
+        #     list(enumerate(self._model.importances())),
+        #     key=lambda x: np.abs(x[1]),
+        #     reverse=True,
+        # )[:k]
+
+        top_substances, top_importances = self.get_top_substances(k, index=True)
 
         if by_name:
             labels = [
-                self._model._nmr_library.substance_by_index(x[0]).name
-                for x in sorted_importances
+                self._model._nmr_library.substance_by_index(idx_).name for idx_ in top_substances
             ]
         else:
-            labels = [str(x[0]) for x in sorted_importances]
+            labels = [str(idx_) for idx_ in top_substances]
 
-        fig, axes = plt.subplots(nrows=1, ncols=1, figsize=figsize)
+        if backend == 'mpl':
+            fig, axes = plt.subplots(nrows=1, ncols=1, figsize=figsize)
 
-        axes.barh(
-            y=np.arange(k)[::-1],
-            width=[h[1] for h in sorted_importances],
-            align="center",
-            tick_label=labels,
-        )
-        axes.set_xlabel("Importance")
+            axes.barh(
+                y=np.arange(k)[::-1],
+                width=[imp_ for imp_ in top_importances],
+                align="center",
+                tick_label=labels,
+            )
+            axes.set_xlabel("Importance")
 
-        return axes
+            return axes
+        elif backend == 'plotly':
+            df = pd.DataFrame(
+                data=[[l_, imp_] for (l_, imp_) in zip(labels, top_importances)],
+                columns=['Label', 'Importance']
+            )
+
+            fig = px.bar(
+                data_frame=df.iloc[:k],
+                x='Importance',
+                y='Label',
+                orientation='h',
+                log_x=True,
+            )
+            fig.update_yaxes(autorange="reversed")
+            fig.update_layout(barcornerradius=7)
+            fig.update_layout(yaxis_title="")
+
+            return fig
+        else:
+            raise ValueError(f"Unrecognized backend {backend}")
 
     def build_residual(self) -> "substance.Substance":
         """
