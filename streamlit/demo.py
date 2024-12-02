@@ -231,15 +231,26 @@ if uploaded_file is not None:
 
             # Now plot the important spectra themselves
             top_substances, top_importances = analysis_.get_top_substances(k=n_imp_)
-            n_cols_ = 3
-            n_rows_ = int(np.ceil(n_imp_ / n_cols_))
+            n_cols_ = st.slider(
+                label='Number of columns',
+                value=3, 
+                min_value=1, 
+                max_value=n_imp_,
+                step=1
+            )
+            n_rows_ = np.max([1, int(np.ceil(n_imp_ / n_cols_))])
             ctr = 0
             for row_idx in range(n_rows_):
                 for col_, col_idx in zip(st.columns(n_cols_), range(n_cols_)):
                     with col_:
                         if ctr < n_imp_:
+                            cmap_option_ = st.selectbox(
+                                "Colormap",
+                                ("Reds", "Blues", "Viridis", "Plasma", "RdBu"),
+                                index=0,
+                            )
                             st.plotly_chart(
-                                top_substances[ctr].plot(absolute_values=True, backend='plotly',)
+                                top_substances[ctr].plot(absolute_values=True, backend='plotly', cmap=cmap_option_)
                             )  
                         ctr += 1
 
