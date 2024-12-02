@@ -197,7 +197,7 @@ if uploaded_file is not None:
                         )
                         selection_ = st.selectbox(
                             label="Selection scheme, see [Lasso documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html)",
-                            options=["selection", "random"],
+                            options=["cyclic", "random"],
                             index=0,
                         )
                         tol_ = st.number_input(
