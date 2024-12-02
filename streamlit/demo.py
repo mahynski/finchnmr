@@ -140,10 +140,10 @@ if uploaded_file is not None:
                     param_grid = {'alpha': np.logspace(start_alpha_, stop_alpha_, int(n_))} # Select a range of alpha values to examine sparsity
 
                     # Lasso configuration
-                    max_iter_ = st.number_input(label="Max number of iterations to converge", min_value=1, max_value=100000, value=1000, step=1)
-                    selection_ = st.selectbox(label='Selection scheme', options=['selection', 'random'], index=0)
+                    max_iter_ = st.number_input(label="Max number of iterations to converge, see [Lasso documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html)", min_value=1, max_value=100000, value=1000, step=1)
+                    selection_ = st.selectbox(label='Selection scheme, see [Lasso documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html)', options=['selection', 'random'], index=0)
                     if selection_ == 'random':
-                        random_state_ = st.number_input(label="RNG seed", min_value=None, max_value=None, value=42)
+                        random_state_ = st.number_input(label="RNG seed, see [Lasso documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html)", min_value=None, max_value=None, value=42)
                     else:
                         random_state_ = 42
                     tol_ = st.number_input(label="Convergence tolerance, see [Lasso documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html)", min_value=None, max_value=None, value=0.0001, format="%0.4f", step=0.0001)
