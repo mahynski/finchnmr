@@ -38,7 +38,7 @@ def build_library():
     return lib
 
 @st.cache_data
-def build_model(_target, _lib, _param_grid, _model_name):
+def build_model(_target, _lib, _param_grid, _model_name, _model_kw):
     """Build lasso model for target."""
     if _model_name.lower() == "lasso":
         nmr_model = finchnmr.model.LASSO, # Use a Lasso model to obtain a sparse solution
@@ -50,7 +50,7 @@ def build_model(_target, _lib, _param_grid, _model_name):
         nmr_library=_lib,
         nmr_model=nmr_model,
         param_grid=_param_grid, 
-        model_kw={'max_iter':1000, 'selection':'cyclic', 'random_state':42, 'tol':0.0001} # These are default, but you can adjust
+        model_kw=_model_kw, 
     )
     return optimized_models, analyses
 
@@ -130,22 +130,28 @@ if uploaded_file is not None:
         if model_:
             model_name_ = model_.lower()
             param_grid = {}
-            
-            # Set parameters
-            if model_.lower() == "lasso":
-                start_alpha_ = st.number_input(label="Smallest alpha (log base)", min_value=-16, max_value=16, value="min", step=1)
-                stop_alpha_ = st.number_input(label="Largest alpha (log base)", min_value=-16, max_value=16, value="min", step=1)
-                n_ = st.slider(label="Number of alpha values in logscale", value=1)
-                param_grid = {'alpha': np.logspace(start_alpha_, stop_alpha_, n_)}, # Select a range of alpha values to examine sparsity
+            model_kw = {}
+
+            with st.form(key='model_settings'):
+                # Set parameters and model kwargs
+                if model_.lower() == "lasso":
+                    start_alpha_ = st.number_input(label="Smallest alpha (log base)", min_value=-16, max_value=16, value="min", step=1)
+                    stop_alpha_ = st.number_input(label="Largest alpha (log base)", min_value=-16, max_value=16, value=0, step=1)
+                    n_ = st.slider(label="Number of alpha values in logscale", value=1)
+                    param_grid = {'alpha': np.logspace(start_alpha_, stop_alpha_, n_)}, # Select a range of alpha values to examine sparsity
+
+                    model_kw = {'max_iter':1000, 'selection':'cyclic', 'random_state':42, 'tol':0.0001} # These are default, but you can adjust
+
+                submit_button = st.button("Start Building Model", icon=":material/start:")
 
             # Optimize a model
-            div1_, div2_ = st.columns([1,1])
-            with div1_:
-                start_btn = st.button("Start Building Model", icon=":material/start:")
-            with div2_:
-                stop_btn = st.button("Stop", type="primary", icon=":material/block:")
+            # div1_, div2_ = st.columns([1,1])
+            # with div1_:
+            #     start_btn = st.button("Start Building Model", icon=":material/start:")
+            # with div2_:
+                # stop_btn = st.button("Stop", type="primary", icon=":material/block:")
 
-            if start_btn:
+            if submit_button:
                 with st.spinner(text="Building..."):
                     optimized_models, analyses = build_model(_target=target, _lib=lib, _param_grid=param_grid, _model_name=model_name_)
                 st.success("Model has been built and cached!")
