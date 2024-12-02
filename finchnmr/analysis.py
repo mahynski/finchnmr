@@ -261,12 +261,6 @@ class Analysis:
         if k == -1:
             k = len(self._model.importances())
 
-        # sorted_importances = sorted(
-        #     list(enumerate(self._model.importances())),
-        #     key=lambda x: np.abs(x[1]),
-        #     reverse=True,
-        # )[:k]
-
         top_substances, top_importances = self.get_top_substances(k, index=True)
 
         if by_name:
@@ -286,6 +280,7 @@ class Analysis:
                 tick_label=labels,
             )
             axes.set_xlabel("Importance")
+            axes.set_xscale('log')
 
             return axes
         elif backend == "plotly":

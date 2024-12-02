@@ -56,7 +56,7 @@ st.header("Analyze an HSQC NMR Spectra with FINCHnmr")
 st.logo(
     "docs/_static/logo_small.png",
     size="large",
-    link="https://github.com/mahynski/finchnmr",
+    link="https://finchnmr.readthedocs.io/",
 )
 
 with st.sidebar:
