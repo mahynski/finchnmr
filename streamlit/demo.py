@@ -169,6 +169,7 @@ if uploaded_file is not None:
 
         if len(optimized_models) > 0:
             model_ = optimized_models[0] # We only fit one model
+            analysis_ = analyses[0]
 
             # Plot original vs. reconstructed and residual
             col3_, col4_, col5_ = st.columns(3)
@@ -178,11 +179,12 @@ if uploaded_file is not None:
                     "Colormap",
                     ("Reds", "Blues", "Viridis", "Plasma", "RdBu"),
                     index=0,
-                    key='compare_orig'
+                    key='compare_orig',
                 )
                 st.plotly_chart(
                     target.plot(absolute_values=True, backend='plotly', cmap=cmap_option3),
-                    key='compare_orig_plot'
+                    key='compare_orig_plot',
+                    title='Original Spectrum'
                 )
 
             with col4_:
@@ -205,6 +207,6 @@ if uploaded_file is not None:
                     key='compare_resid'
                 )
                 st.plotly_chart(
-                    analyses[0].build_residual().plot(absolute_values=True, backend='plotly', cmap=cmap_option5),
+                    analysis_.build_residual().plot(absolute_values=True, backend='plotly', cmap=cmap_option5),
                     key='compare_resid_plot'
                 )
