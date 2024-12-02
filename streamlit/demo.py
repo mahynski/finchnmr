@@ -104,7 +104,7 @@ if uploaded_file is not None:
     )
     
     success_ = False
-    tab1_, tab2_ = st.tabs(["Set up model", "Results"]) 
+    tab1_, tab2_ = st.tabs(["Configure Model", "Analyze Results"]) 
     with tab1_:
         col1_, col2_ = st.columns(2)
         
