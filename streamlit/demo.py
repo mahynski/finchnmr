@@ -120,7 +120,7 @@ if uploaded_file is not None:
 
         with col2_:
             # Load reference library from HF
-            with st.spinner(text="Building HSQC Library (this can take a minute the first time)..."):
+            with st.spinner(text="Building HSQC Library from [HF](https://huggingface.co/datasets/mahynski/bmrb-hsqc-nmr-1H13C) (this can take a minute the first time)..."):
                 lib = build_library()
             st.success("Library has been built and cached!")
 
@@ -209,3 +209,8 @@ if uploaded_file is not None:
                     analysis_.build_residual().plot(absolute_values=True, backend='plotly', cmap=cmap_option5, title='Residual'),
                     key='compare_resid_plot'
                 )
+
+            st.pyplot(
+                analysis_.plot_top_spectra(k=6, plot_width=3),
+                use_container_width=True
+            )
