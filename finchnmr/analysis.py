@@ -172,7 +172,7 @@ class Analysis:
         k: int = 5,
         plot_width: int = 3,
         figsize: Union[tuple[int, int], None] = (10, 5),
-    ) -> NDArray["matplotlib.pyplot.Axes"]:
+    ) -> NDArray:
         """
         Plot the HSQC NMR spectra that are the most importance to the model using matplotlib.
 
@@ -271,7 +271,7 @@ class Analysis:
             labels = [str(idx_) for idx_ in top_substances]
 
         if backend == "mpl":
-            fig, axes = plt.subplots(nrows=1, ncols=1, figsize=figsize)
+            _, axes = plt.subplots(nrows=1, ncols=1, figsize=figsize)
 
             axes.barh(
                 y=np.arange(k)[::-1],
