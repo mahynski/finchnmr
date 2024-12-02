@@ -119,12 +119,12 @@ if uploaded_file is not None:
         st.success("Library has been built and cached!")
     
         # Optimize a model
-        div1_, fiv2_ = st.columns([1,1])
+        div1_, div2_ = st.columns([1,1])
         with div1_:
             start_btn = st.button("Build Model")
         with div2_:
             stop_btn = st.button("Stop", type="primary")
-            
+
         if start_btn:
             with st.spinner(text="Building..."):
                 optimized_models, analyses = build_model(target, lib)
