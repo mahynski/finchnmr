@@ -38,18 +38,18 @@ def build_library():
     return lib
 
 # @st.cache_data
-def build_model(_target, _lib, _param_grid, _model_name, _model_kw):
+def build_model(_target, _lib, _param_grid, _nmr_model, _model_kw):
     """Build lasso model for target."""
-    nmr_model = finchnmr.model.LASSO
-    if _model_name.lower() == "lasso":
-        nmr_model = finchnmr.model.LASSO, # Use a Lasso model to obtain a sparse solution
-    else:
-        raise ValueError(f"Unrecognized model {_model_name}")
+    # _nmr_model = finchnmr.model.LASSO
+    # if _model_name.lower() == "lasso":
+    #     _nmr_model = finchnmr.model.LASSO, # Use a Lasso model to obtain a sparse solution
+    # else:
+    #     raise ValueError(f"Unrecognized model {_model_name}")
     
     optimized_models, analyses = finchnmr.model.optimize_models(
         targets=[_target],
         nmr_library=_lib,
-        nmr_model=nmr_model,
+        nmr_model=_nmr_model,
         param_grid=_param_grid, 
         model_kw=_model_kw, 
     )
@@ -154,7 +154,7 @@ if uploaded_file is not None:
 
             if submit_button:
                 with st.spinner(text="Building..."):
-                    optimized_models, analyses = build_model(_target=target, _lib=lib, _param_grid=param_grid, _model_name=model_name, _model_kw=model_kw)
+                    optimized_models, analyses = build_model(_target=target, _lib=lib, _param_grid=param_grid, _nmr_model=finchnmr.model.LASSO, _model_kw=model_kw)
                 st.success("Model has been built and cached!")
 
         
