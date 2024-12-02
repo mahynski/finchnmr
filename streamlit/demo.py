@@ -38,13 +38,18 @@ def build_library():
     return lib
 
 @st.cache_data
-def build_model(_target, _lib):
+def build_model(_target, _lib, _param_grid, _model_name):
     """Build lasso model for target."""
+    if _model_name.lower() == "lasso":
+        nmr_model = finchnmr.model.LASSO, # Use a Lasso model to obtain a sparse solution
+    else:
+        raise ValueError(f"Unrecognized model {_model_name}")
+    
     optimized_models, analyses = finchnmr.model.optimize_models(
         targets=[_target],
         nmr_library=_lib,
-        nmr_model=finchnmr.model.LASSO, # Use a Lasso model to obtain a sparse solution
-        param_grid={'alpha': np.logspace(-16, 0, 10)}, # Select a range of alpha values to examine sparsity
+        nmr_model=nmr_model,
+        param_grid=_param_grid, 
         model_kw={'max_iter':1000, 'selection':'cyclic', 'random_state':42, 'tol':0.0001} # These are default, but you can adjust
     )
     return optimized_models, analyses
@@ -69,14 +74,12 @@ with st.sidebar:
     st.write('Made by ***Nate Mahynski***')
     st.write('nathan.mahynski@nist.gov')
     
-# st.text("The directory structure should look something like this:\n\nexperiment-42.zip\n|\t\tacqu\n|    acqu2\n|    acqu2s\n|    acqus\n|    audita.txt\n|    cpdprg2\n|    format.temp\n|    fq1list\n|\n----pdata\n|   |\n|   ----1\n|       |    2ii\n|       |    2ir\n|       |    2ri\n|       |    2rr\n|       |    assocs\n  |       |    auditp.txt\n  |       |    clevels\n|       |    curdat2\n|       |    outd\n|       |    proc\n|       |    proc2\n |       |    proc2s\n |       |    procs\n|       |    thumb.png\n|       |    title\n|    prosol_History\n |    pulseprogram\n|    scon2\n|    ser\n|    specpar\n|    spnam14\n|    spnam3\n|    spnam31\n |    spnam7\n|    uxnmr.info\n|    uxnmr.par\n")
-
 with st.popover("Example Upload Directory"):
     st.text("example/\n├── acqu\n├── acqu2\n├── acqu2s\n├── acqus\n├── audita.txt\n├── cpdprg2\n├── format.temp\n├── fq1list\n├── pdata\n│       └── 1\n│                  ├── 2ii\n│                  ├── 2ir\n│                  ├── 2ri\n│                  ├── 2rr\n│                  ├── assocs\n│                  ├── auditp.txt\n│                  ├── clevels\n│                  ├── curdat2\n│                  ├── outd\n│                  ├── proc\n│                  ├── proc2\n│                  ├── proc2s\n│                  ├── procs\n│                  ├── thumb.png\n│                  └── title\n├── prosol_History\n├── pulseprogram\n├── scon2\n├── ser\n├── specpar\n├── spnam14\n├── spnam3\n├── spnam31\n├── spnam7\n├── uxnmr.info\n└── uxnmr.par\n")
 
 # ----------------------------------- MAIN -----------------------------------
 uploaded_file = st.file_uploader(
-    label="Upload a directory output by a Bruker HSQC NMR instrument to start. This should be provided as .zip file. Refer to the dropdown above for an example of the directory structure.",
+    label="Upload a directory output by a Bruker HSQC NMR instrument to start. This should be provided as .zip file. Refer to the dropdown above for an example of the directory structure which should be provided, e.g., as example.zip.",
     type=['zip'], 
     accept_multiple_files=False, 
     key=None, 
@@ -121,18 +124,31 @@ if uploaded_file is not None:
         with st.spinner(text="Building HSQC Library (this can take a minute the first time)..."):
             lib = build_library()
         st.success("Library has been built and cached!")
-    
-        # Optimize a model
-        div1_, div2_ = st.columns([1,1])
-        with div1_:
-            start_btn = st.button("Start Building Model", icon=":material/start:")
-        with div2_:
-            stop_btn = st.button("Stop", type="primary", icon=":material/block:")
 
-        if start_btn:
-            with st.spinner(text="Building..."):
-                optimized_models, analyses = build_model(target, lib)
-            st.success("Model has been built and cached!")
+        model_ = st.selectbox(label="Choose a model", options=["Lasso"], index=0)
+
+        if model_:
+            model_name_ = model_.lower()
+            param_grid = {}
+            
+            # Set parameters
+            if model_.lower() == "lasso":
+                start_alpha_ = st.number_input(label="Smallest alpha (log base)", min_value=-16, max_value=16, value="min", step=1)
+                stop_alpha_ = st.number_input(label="Largest alpha (log base)", min_value=-16, max_value=16, value="min", step=1)
+                n_ = st.slider(label="Number of alpha values in logscale", value=1)
+                param_grid = {'alpha': np.logspace(start_alpha_, stop_alpha_, n_)}, # Select a range of alpha values to examine sparsity
+
+            # Optimize a model
+            div1_, div2_ = st.columns([1,1])
+            with div1_:
+                start_btn = st.button("Start Building Model", icon=":material/start:")
+            with div2_:
+                stop_btn = st.button("Stop", type="primary", icon=":material/block:")
+
+            if start_btn:
+                with st.spinner(text="Building..."):
+                    optimized_models, analyses = build_model(_target=target, _lib=lib, _param_grid=param_grid, _model_name=model_name_)
+                st.success("Model has been built and cached!")
 
         
         
