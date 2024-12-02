@@ -214,12 +214,12 @@ if uploaded_file is not None:
             max_n_ = len(analysis_._model.importances())
             n_imp_ = st.slider(
                 label='Visualize the most important N spectra in the library',
-                value=np.max([10, max_n_]), 
+                value=np.min([10, max_n_]), 
                 min_value=1, 
                 max_value=max_n_,
                 step=1
             )
             st.pyplot(
-                analysis_.plot_top_importances(k=max_n_, by_name=True).get_figure(),
+                analysis_.plot_top_importances(k=n_imp_, by_name=True).get_figure(),
                 use_container_width=True
             )
