@@ -142,7 +142,7 @@ if uploaded_file is not None:
 
                     model_kw = {'max_iter':1000, 'selection':'cyclic', 'random_state':42, 'tol':0.0001} # These are default, but you can adjust
 
-                submit_button = st.button("Start Building Model", icon=":material/start:")
+                submit_button = st.form_submit_button("Start Building Model", icon=":material/start:")
 
             # Optimize a model
             # div1_, div2_ = st.columns([1,1])
