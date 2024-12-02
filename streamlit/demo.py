@@ -103,57 +103,61 @@ if uploaded_file is not None:
         warning='ignore'
     )
     
-    col1_, col2_ = st.columns(2)
-    
-    with col1_:
-        # Plot the substance with plotly
-        cmap_option = st.selectbox(
-            "Colormap",
-            ("Reds", "Blues", "Viridis", "Plasma", "RdBu"),
-            index=0,
-        )
-        st.plotly_chart(target.plot(absolute_values=True, backend='plotly', cmap=cmap_option))
+    tab1_, tab2_ = st.tabs(["Set up model", "Results"]) 
+    with tab1_:
+        col1_, col2_ = st.columns(2)
+        
+        with col1_:
+            # Plot the substance with plotly
+            cmap_option = st.selectbox(
+                "Colormap",
+                ("Reds", "Blues", "Viridis", "Plasma", "RdBu"),
+                index=0,
+            )
+            st.plotly_chart(target.plot(absolute_values=True, backend='plotly', cmap=cmap_option))
 
-    with col2_:
-        # Load reference library from HF
-        with st.spinner(text="Building HSQC Library (this can take a minute the first time)..."):
-            lib = build_library()
-        st.success("Library has been built and cached!")
+        with col2_:
+            # Load reference library from HF
+            with st.spinner(text="Building HSQC Library (this can take a minute the first time)..."):
+                lib = build_library()
+            st.success("Library has been built and cached!")
 
-        # Select model type
-        model_ = st.selectbox(label="Choose a model", options=["Lasso"], index=0)
+            # Select model type
+            model_ = st.selectbox(label="Choose a model", options=["Lasso"], index=0)
 
-        if model_:
-            nmr_model = None
-            param_grid = {}
-            model_kw = {}
+            if model_:
+                nmr_model = None
+                param_grid = {}
+                model_kw = {}
 
-            # Set parameters and model kwargs
-            with st.form(key='model_settings'):
-                if model_.lower() == "lasso":
-                    nmr_model = finchnmr.model.LASSO
-                    start_alpha_ = st.number_input(label="Smallest alpha (log base)", min_value=-16, max_value=16, value="min", step=1)
-                    stop_alpha_ = st.number_input(label="Largest alpha (log base)", min_value=-16, max_value=16, value=0, step=1)
-                    n_ = st.slider(label="Number of alpha values in logscale", min_value=1, max_value=100, value=1, step=1)
-                    
-                    # Set of alphas to check
-                    st.write("Hyperparameters")
-                    param_grid = {'alpha': np.logspace(start_alpha_, stop_alpha_, int(n_))} # Select a range of alpha values to examine sparsity
+                # Set parameters and model kwargs
+                with st.form(key='model_settings'):
+                    if model_.lower() == "lasso":
+                        nmr_model = finchnmr.model.LASSO
+                        start_alpha_ = st.number_input(label="Smallest alpha (log base)", min_value=-16, max_value=16, value="min", step=1)
+                        stop_alpha_ = st.number_input(label="Largest alpha (log base)", min_value=-16, max_value=16, value=0, step=1)
+                        n_ = st.slider(label="Number of alpha values in logscale", min_value=1, max_value=100, value=1, step=1)
+                        
+                        # Set of alphas to check
+                        st.write("Hyperparameters")
+                        param_grid = {'alpha': np.logspace(start_alpha_, stop_alpha_, int(n_))} # Select a range of alpha values to examine sparsity
 
-                    # Lasso configuration
-                    st.write("Model Configuration")
-                    max_iter_ = st.number_input(label="Max number of iterations to converge, see [Lasso documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html)", min_value=1, max_value=100000, value=1000, step=1)
-                    selection_ = st.selectbox(label='Selection scheme, see [Lasso documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html)', options=['selection', 'random'], index=0)
-                    tol_ = st.number_input(label="Convergence tolerance, see [Lasso documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html)", min_value=None, max_value=None, value=0.0001, format="%0.4f", step=0.0001)
-                    model_kw = {'max_iter':int(max_iter_), 'selection':selection_, 'random_state':42, 'tol':tol_} 
+                        # Lasso configuration
+                        st.write("Model Configuration")
+                        max_iter_ = st.number_input(label="Max number of iterations to converge, see [Lasso documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html)", min_value=1, max_value=100000, value=1000, step=1)
+                        selection_ = st.selectbox(label='Selection scheme, see [Lasso documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html)', options=['selection', 'random'], index=0)
+                        tol_ = st.number_input(label="Convergence tolerance, see [Lasso documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html)", min_value=None, max_value=None, value=0.0001, format="%0.4f", step=0.0001)
+                        model_kw = {'max_iter':int(max_iter_), 'selection':selection_, 'random_state':42, 'tol':tol_} 
 
-                submit_button = st.form_submit_button("Start Building Model", icon=":material/start:")
+                    submit_button = st.form_submit_button("Start Building Model", icon=":material/start:")
 
-            # Build the model
-            if submit_button:
-                stop_btn = st.button("Stop Building Model", type="primary", icon=":material/block:")
-                with st.spinner(text="Building..."):
-                    optimized_models, analyses = build_model(_target=target, _lib=lib, _param_grid=param_grid, _nmr_model=nmr_model, _model_kw=model_kw)
-                st.success("Model has been built and cached!")
+                # Build the model
+                if submit_button:
+                    stop_btn = st.button("Stop Building Model", type="primary", icon=":material/block:")
+                    with st.spinner(text="Building..."):
+                        optimized_models, analyses = build_model(_target=target, _lib=lib, _param_grid=param_grid, _nmr_model=nmr_model, _model_kw=model_kw)
+                    st.success("Model has been built and cached!")
 
     # Now present the analysis / results
+    with tab2_:
+        st.write('hello')
