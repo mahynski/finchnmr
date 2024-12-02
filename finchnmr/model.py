@@ -102,13 +102,11 @@ def optimize_models(
         for param_set in tqdm.tqdm(
             param_sets, desc="Iterating through parameter sets"
         ):
-            print(f'target {i} : param set : ', param_set)
             try:
                 estimator_ = build_fitted_model_(
                     model_kw, param_set, nmr_library, target
                 )
             except Exception as e:
-                print(f'caught: {e}')
                 pass  # Do not score this model
             else:
                 scores.append(estimator_.score())

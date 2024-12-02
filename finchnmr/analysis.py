@@ -280,7 +280,7 @@ class Analysis:
                 tick_label=labels,
             )
             axes.set_xlabel("Importance")
-            axes.set_xscale('log')
+            axes.set_xscale("log")
 
             return axes
         elif backend == "plotly":

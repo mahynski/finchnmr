@@ -17,14 +17,25 @@ from streamlit_extras.add_vertical_space import add_vertical_space
 
 UPLOAD_FOLDER = "uploaded_nmr"
 
+
+def is_running_on_huggingface():
+    """Check if the app is running on Hugging Face Spaces."""
+    return "HF_SPACE_ID" in os.environ
+
+
 # ----------------------------- CACHED FUNCTIONS -----------------------------
 @st.cache_data
 def build_library():
     """Build NMR library from HF."""
+    if is_running_on_huggingface():
+        token = os.getenv("HF_TOKEN")  # If on huggingface
+    else:
+        token = st.secrets["HF_TOKEN"]  # If on streamlit community cloud
+
     nmr_dataset = load_dataset(
         "mahynski/bmrb-hsqc-nmr-1H13C",
         split="train",
-        token=st.secrets["HF_TOKEN"],
+        token=token,
         trust_remote_code=True,
     )
     substances = [
@@ -37,7 +48,6 @@ def build_library():
     return lib
 
 
-# @st.cache_data
 def build_model(_target, _lib, _param_grid, _nmr_model, _model_kw):
     """Build model for target."""
     optimized_models, analyses = finchnmr.model.optimize_models(
@@ -60,7 +70,9 @@ st.logo(
 )
 
 with st.sidebar:
-    st.image("https://raw.githubusercontent.com/mahynski/finchnmr/main/docs/_static/logo_small.png")
+    st.image(
+        "https://raw.githubusercontent.com/mahynski/finchnmr/main/docs/_static/logo_small.png"
+    )
     st.markdown(
         """
     ## About this application
@@ -111,8 +123,6 @@ if uploaded_file is not None:
         name=head,
         warning="ignore",
     )
-
-    optimized_models = []
 
     tab1_, tab2_ = st.tabs(["Configure Model", "Analyze Results"])
     with tab1_:
@@ -234,26 +244,39 @@ if uploaded_file is not None:
                             _nmr_model=nmr_model,
                             _model_kw=model_kw,
                         )
+                        st.session_state["optimized_models"] = optimized_models
+                        st.session_state["analyses"] = analyses
+
                     st.success("Model has been built and cached!", icon="✅")
 
     # Now present the analysis / results
     with tab2_:
         # import pickle
-
         # optimized_models = [
         #     pickle.load(open("streamlit/example_model.pkl", "rb"))
-        # ]  # TEMP
+        # ]
         # analyses = [
         #     pickle.load(open("streamlit/example_analysis.pkl", "rb"))
-        # ]  # TEMP
+        # ]
 
-        if len(optimized_models) > 0:
+        if "optimized_models" in st.session_state:
             st.subheader(
                 "Observe how well the model fits the original spectrum."
             )
 
-            model_ = optimized_models[0]  # We only fit one model
-            analysis_ = analyses[0]
+            model_ = st.session_state["optimized_models"][
+                0
+            ]  # We only fit one model
+            analysis_ = st.session_state["analyses"][0]
+
+            with st.popover("Optimized Model Summary"):
+                mcol1_, mcol2_ = st.columns([1, 1])
+                with mcol1_:
+                    st.metric(label="Model's score (R^2)", value=model_.score())
+
+                with mcol2_:
+                    st.write("Best hyperparameters")
+                    st.json(model_.get_params(), expanded=False)
 
             # Plot original vs. reconstructed and residual
             col3_, col4_ = st.columns(2)
