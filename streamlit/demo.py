@@ -54,13 +54,13 @@ def build_model(_target, _lib, _param_grid, _nmr_model, _model_kw):
 st.set_page_config(layout="wide")
 st.header("Analyze an HSQC NMR Spectra with FINCHnmr")
 st.logo(
-    "docs/_static/logo_small.png",
+    "https://raw.githubusercontent.com/mahynski/finchnmr/main/docs/_static/logo_small.png",
     size="large",
     link="https://finchnmr.readthedocs.io/",
 )
 
 with st.sidebar:
-    st.image("docs/_static/logo_small.png")
+    st.image("https://raw.githubusercontent.com/mahynski/finchnmr/main/docs/_static/logo_small.png")
     st.markdown(
         """
     ## About this application
