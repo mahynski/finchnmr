@@ -155,9 +155,10 @@ if uploaded_file is not None:
                 # Build the model
                 if submit_button:
                     stop_btn = st.button("Stop Building Model", type="primary", icon=":material/block:")
-                    with st.spinner(text="Building..."):
-                        optimized_models, analyses = build_model(_target=target, _lib=lib, _param_grid=param_grid, _nmr_model=nmr_model, _model_kw=model_kw)
-                    success_ = st.success("Model has been built and cached!", icon="✅")
+                    success_ = True
+                    # with st.spinner(text="Building..."):
+                    #     optimized_models, analyses = build_model(_target=target, _lib=lib, _param_grid=param_grid, _nmr_model=nmr_model, _model_kw=model_kw)
+                    # success_ = st.success("Model has been built and cached!", icon="✅")
 
     # Now present the analysis / results
     with tab2_:
