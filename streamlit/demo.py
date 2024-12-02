@@ -210,8 +210,16 @@ if uploaded_file is not None:
                     key='compare_resid_plot'
                 )
 
-            # Plot spectra of 
+            # Plot most important spectra
+            max_n_ = len(analysis_._model.importances())
+            n_imp_ = st.slider(
+                label='Visualize the most important N spectra in the library',
+                value=np.max([10, max_n_]), 
+                min_value=1, 
+                max_value=max_n_,
+                step=1
+            )
             st.pyplot(
-                analysis_.plot_top_spectra(k=6, plot_width=3)[0].get_figure(),
+                analysis_.plot_top_importances(k=max_n_, by_name=True).get_figure(),
                 use_container_width=True
             )
