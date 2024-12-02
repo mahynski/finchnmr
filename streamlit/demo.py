@@ -103,6 +103,7 @@ if uploaded_file is not None:
         warning='ignore'
     )
     
+    success_ = False
     tab1_, tab2_ = st.tabs(["Set up model", "Results"]) 
     with tab1_:
         col1_, col2_ = st.columns(2)
