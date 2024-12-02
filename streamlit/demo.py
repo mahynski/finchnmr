@@ -40,6 +40,7 @@ def build_library():
 # @st.cache_data
 def build_model(_target, _lib, _param_grid, _model_name, _model_kw):
     """Build lasso model for target."""
+    nmr_model = finchnmr.model.LASSO
     if _model_name.lower() == "lasso":
         nmr_model = finchnmr.model.LASSO, # Use a Lasso model to obtain a sparse solution
     else:
