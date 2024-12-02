@@ -98,11 +98,11 @@ def optimize_models(
     for i, target in tqdm.tqdm(
         enumerate(targets), desc="Iterating through targets"
     ):
-        print(f'set {i}', param_set)
         scores = []
         for param_set in tqdm.tqdm(
             param_sets, desc="Iterating through parameter sets"
         ):
+            print(f'target {i} : param set : ', param_set)
             try:
                 estimator_ = build_fitted_model_(
                     model_kw, param_set, nmr_library, target
