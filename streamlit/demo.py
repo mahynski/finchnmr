@@ -165,6 +165,7 @@ if uploaded_file is not None:
     with tab2_:
         import pickle
         optimized_models = [pickle.load(open("streamlit/example_model.pkl", 'rb'))] # TEMP
+        analyses = [pickle.load(open("streamlit/example_analysis.pkl", 'rb'))] # TEMP
 
         if len(optimized_models) > 0:
             model_ = optimized_models[0] # We only fit one model
