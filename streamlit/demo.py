@@ -172,7 +172,7 @@ if uploaded_file is not None:
             analysis_ = analyses[0]
 
             # Plot original vs. reconstructed and residual
-            col3_, col4_, col5_ = st.columns(3)
+            col3_, col4_ = st.columns(2)
             with col3_:
                 # Plot the substance with plotly
                 cmap_option3 = st.selectbox(
@@ -198,6 +198,7 @@ if uploaded_file is not None:
                     key='compare_recon_plot'
                 )
 
+            col5_, col6_ = st.columns(2)
             with col5_:
                 cmap_option5 = st.selectbox(
                     "Colormap",
@@ -210,16 +211,17 @@ if uploaded_file is not None:
                     key='compare_resid_plot'
                 )
 
-            # Plot most important spectra
-            max_n_ = len(analysis_._model.importances())
-            n_imp_ = st.slider(
-                label='Visualize the most important N spectra in the library',
-                value=np.min([10, max_n_]), 
-                min_value=1, 
-                max_value=max_n_,
-                step=1
-            )
-            st.pyplot(
-                analysis_.plot_top_importances(k=n_imp_, by_name=True).get_figure(),
-                use_container_width=False
-            )
+            with col6_:
+                # Plot most important spectra
+                max_n_ = len(analysis_._model.importances())
+                n_imp_ = st.slider(
+                    label='Visualize the most important N spectra in the library',
+                    value=np.min([10, max_n_]), 
+                    min_value=1, 
+                    max_value=max_n_,
+                    step=1
+                )
+                st.pyplot(
+                    analysis_.plot_top_importances(k=n_imp_, by_name=True).get_figure(),
+                    use_container_width=True
+                )
