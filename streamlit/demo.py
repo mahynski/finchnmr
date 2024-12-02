@@ -221,5 +221,5 @@ if uploaded_file is not None:
             )
             st.pyplot(
                 analysis_.plot_top_importances(k=n_imp_, by_name=True).get_figure(),
-                use_container_width=True
+                use_container_width=False
             )
