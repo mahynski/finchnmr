@@ -156,8 +156,9 @@ if uploaded_file is not None:
                     stop_btn = st.button("Stop Building Model", type="primary", icon=":material/block:")
                     with st.spinner(text="Building..."):
                         optimized_models, analyses = build_model(_target=target, _lib=lib, _param_grid=param_grid, _nmr_model=nmr_model, _model_kw=model_kw)
-                    st.success("Model has been built and cached!")
+                    success_ = st.success("Model has been built and cached!", icon="✅")
 
     # Now present the analysis / results
     with tab2_:
-        st.write('hello')
+        if success_:
+            st.write('hello')
