@@ -168,6 +168,8 @@ if uploaded_file is not None:
         analyses = [pickle.load(open("streamlit/example_analysis.pkl", 'rb'))] # TEMP
 
         if len(optimized_models) > 0:
+            st.subheader('Observe how well the model fits the original spectrum.')
+
             model_ = optimized_models[0] # We only fit one model
             analysis_ = analyses[0]
 
@@ -228,6 +230,7 @@ if uploaded_file is not None:
                 )
 
             st.divider()
+            st.subheader('Visualize the most important substances from the library used')
 
             # Now plot the important spectra themselves
             top_substances, top_importances = analysis_.get_top_substances(k=n_imp_)
