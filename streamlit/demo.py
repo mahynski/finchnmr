@@ -210,7 +210,8 @@ if uploaded_file is not None:
                     key='compare_resid_plot'
                 )
 
+            # Plot spectra of 
             st.pyplot(
-                analysis_.plot_top_spectra(k=6, plot_width=3).get_figure(),
+                analysis_.plot_top_spectra(k=6, plot_width=3)[0].get_figure(),
                 use_container_width=True
             )
