@@ -157,12 +157,14 @@ if uploaded_file is not None:
                 # Build the model
                 if submit_button:
                     stop_btn = st.button("Stop Building Model", type="primary", icon=":material/block:")
-                    # with st.spinner(text="Building..."):
-                    #     optimized_models, analyses = build_model(_target=target, _lib=lib, _param_grid=param_grid, _nmr_model=nmr_model, _model_kw=model_kw)
+                    with st.spinner(text="Building..."):
+                        optimized_models, analyses = build_model(_target=target, _lib=lib, _param_grid=param_grid, _nmr_model=nmr_model, _model_kw=model_kw)
                     st.success("Model has been built and cached!", icon="✅")
 
     # Now present the analysis / results
     with tab2_:
+        optimized_models = [pickle.load(open("streamlit/example_model.pkl", 'rb'))] # TEMP
+
         if len(optimized_models) > 0:
             model_ = optimized_models[0] # We only fit one model
 
