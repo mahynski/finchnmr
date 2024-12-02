@@ -177,6 +177,7 @@ if uploaded_file is not None:
                     "Colormap",
                     ("Reds", "Blues", "Viridis", "Plasma", "RdBu"),
                     index=0,
+                    key='compare_orig'
                 )
                 st.plotly_chart(target.plot(absolute_values=True, backend='plotly', cmap=cmap_option3))
 
@@ -185,6 +186,7 @@ if uploaded_file is not None:
                     "Colormap",
                     ("Reds", "Blues", "Viridis", "Plasma", "RdBu"),
                     index=0,
+                    key='compare_recon'
                 )
                 st.plotly_chart(model_.reconstruct().plot(absolute_values=True, backend='plotly', cmap=cmap_option4))
 
