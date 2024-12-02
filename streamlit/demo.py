@@ -103,7 +103,8 @@ if uploaded_file is not None:
         warning='ignore'
     )
     
-    success_ = False
+    optimized_models = []
+
     tab1_, tab2_ = st.tabs(["Configure Model", "Analyze Results"]) 
     with tab1_:
         col1_, col2_ = st.columns(2)
@@ -156,11 +157,29 @@ if uploaded_file is not None:
                 # Build the model
                 if submit_button:
                     stop_btn = st.button("Stop Building Model", type="primary", icon=":material/block:")
-                    with st.spinner(text="Building..."):
-                        optimized_models, analyses = build_model(_target=target, _lib=lib, _param_grid=param_grid, _nmr_model=nmr_model, _model_kw=model_kw)
-                    success_ = st.success("Model has been built and cached!", icon="✅")
+                    # with st.spinner(text="Building..."):
+                    #     optimized_models, analyses = build_model(_target=target, _lib=lib, _param_grid=param_grid, _nmr_model=nmr_model, _model_kw=model_kw)
+                    st.success("Model has been built and cached!", icon="✅")
 
     # Now present the analysis / results
     with tab2_:
-        if success_:
-            st.write('hello')
+        if len(optimized_models) > 0:
+            model_ = optimized_models[0] # We only fit one model
+
+            col3_, col4_ = st.columns(2)
+            with col3_:
+                # Plot the substance with plotly
+                cmap_option3 = st.selectbox(
+                    "Colormap",
+                    ("Reds", "Blues", "Viridis", "Plasma", "RdBu"),
+                    index=0,
+                )
+                st.plotly_chart(target.plot(absolute_values=True, backend='plotly', cmap=cmap_option3))
+
+            with col4_:
+                cmap_option4 = st.selectbox(
+                    "Colormap",
+                    ("Reds", "Blues", "Viridis", "Plasma", "RdBu"),
+                    index=0,
+                )
+                st.plotly_chart(model_.reconstruct().plot(absolute_values=True, backend='plotly', cmap=cmap_option4))
