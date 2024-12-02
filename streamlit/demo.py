@@ -138,7 +138,7 @@ if uploaded_file is not None:
                     start_alpha_ = st.number_input(label="Smallest alpha (log base)", min_value=-16, max_value=16, value="min", step=1)
                     stop_alpha_ = st.number_input(label="Largest alpha (log base)", min_value=-16, max_value=16, value=0, step=1)
                     n_ = st.slider(label="Number of alpha values in logscale", value=1)
-                    param_grid = {'alpha': np.logspace(start_alpha_, stop_alpha_, n_)}, # Select a range of alpha values to examine sparsity
+                    param_grid = {'alpha': np.logspace(start_alpha_, stop_alpha_, n_)} # Select a range of alpha values to examine sparsity
 
                     model_kw = {'max_iter':1000, 'selection':'cyclic', 'random_state':42, 'tol':0.0001} # These are default, but you can adjust
 
