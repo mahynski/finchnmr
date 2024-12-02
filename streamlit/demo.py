@@ -248,6 +248,7 @@ if uploaded_file is not None:
                                 "Colormap",
                                 ("Reds", "Blues", "Viridis", "Plasma", "RdBu"),
                                 index=0,
+                                key=f"cmap_option_{ctr}_"
                             )
                             st.plotly_chart(
                                 top_substances[ctr].plot(absolute_values=True, backend='plotly', cmap=cmap_option_)
