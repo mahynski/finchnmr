@@ -137,17 +137,15 @@ if uploaded_file is not None:
                     n_ = st.slider(label="Number of alpha values in logscale", min_value=1, max_value=100, value=1, step=1)
                     
                     # Set of alphas to check
+                    st.write("Hyperparameters")
                     param_grid = {'alpha': np.logspace(start_alpha_, stop_alpha_, int(n_))} # Select a range of alpha values to examine sparsity
 
                     # Lasso configuration
+                    st.write("Model Configuration")
                     max_iter_ = st.number_input(label="Max number of iterations to converge, see [Lasso documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html)", min_value=1, max_value=100000, value=1000, step=1)
-                    selection_ = st.selectbox(label='Selection scheme, see [Lasso documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html)', options=['selection', 'random'], index=0)
-                    if selection_ == 'random':
-                        random_state_ = st.number_input(label="RNG seed, see [Lasso documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html)", min_value=None, max_value=None, value=42)
-                    else:
-                        random_state_ = 42
+                    selection_ = st.selectbox(label='Selection scheme, see [Lasso documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html)', options=['selection', 'random (seed=42)'], index=0)
                     tol_ = st.number_input(label="Convergence tolerance, see [Lasso documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html)", min_value=None, max_value=None, value=0.0001, format="%0.4f", step=0.0001)
-                    model_kw = {'max_iter':int(max_iter_), 'selection':selection_, 'random_state':random_state_, 'tol':tol_} 
+                    model_kw = {'max_iter':int(max_iter_), 'selection':selection_, 'random_state':42, 'tol':tol_} 
 
                 submit_button = st.form_submit_button("Start Building Model", icon=":material/start:")
 
