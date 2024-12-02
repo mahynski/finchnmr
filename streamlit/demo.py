@@ -128,7 +128,7 @@ if uploaded_file is not None:
         model_ = st.selectbox(label="Choose a model", options=["Lasso"], index=0)
 
         if model_:
-            model_name_ = model_.lower()
+            model_name = model_.lower()
             param_grid = {}
             model_kw = {}
 
@@ -153,7 +153,7 @@ if uploaded_file is not None:
 
             if submit_button:
                 with st.spinner(text="Building..."):
-                    optimized_models, analyses = build_model(_target=target, _lib=lib, _param_grid=param_grid, _model_name=model_name_)
+                    optimized_models, analyses = build_model(_target=target, _lib=lib, _param_grid=param_grid, _model_name=model_name, _model_kw=model_kw)
                 st.success("Model has been built and cached!")
 
         
