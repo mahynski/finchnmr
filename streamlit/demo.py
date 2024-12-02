@@ -120,6 +120,7 @@ if uploaded_file is not None:
             lib = build_library()
         st.success("Library has been built and cached!")
 
+        # Select model type
         model_ = st.selectbox(label="Choose a model", options=["Lasso"], index=0)
 
         if model_:
@@ -127,32 +128,34 @@ if uploaded_file is not None:
             param_grid = {}
             model_kw = {}
 
+            # Set parameters and model kwargs
             with st.form(key='model_settings'):
-                # Set parameters and model kwargs
                 if model_.lower() == "lasso":
                     nmr_model = finchnmr.model.LASSO
                     start_alpha_ = st.number_input(label="Smallest alpha (log base)", min_value=-16, max_value=16, value="min", step=1)
                     stop_alpha_ = st.number_input(label="Largest alpha (log base)", min_value=-16, max_value=16, value=0, step=1)
                     n_ = st.slider(label="Number of alpha values in logscale", min_value=1, max_value=100, value=1, step=1)
+                    
+                    # Set of alphas to check
                     param_grid = {'alpha': np.logspace(start_alpha_, stop_alpha_, int(n_))} # Select a range of alpha values to examine sparsity
 
-                    model_kw = {'max_iter':1000, 'selection':'cyclic', 'random_state':42, 'tol':0.0001} # These are default, but you can adjust
+                    # Lasso configuration
+                    max_iter_ = st.number_input(label="Max number of iterations to converge", min_value=1, max_value=100000, value=1000, step=1)
+                    selection_ = st.selectbox(label='Selection scheme', options=['selection', 'random'], index=0)
+                    if selection_ == 'random':
+                        random_state_ = st.number_input(label="RNG seed", min_value=None, max_value=None, value=42)
+                    else:
+                        random_state_ = 42
+                    tol_ = st.number_input(label="Convergence tolerance", min_value=None, max_value=None, value=0.0001)
+                    model_kw = {'max_iter':int(max_iter_), 'selection':selection_, 'random_state':random_state_, 'tol':tol_} 
 
                 submit_button = st.form_submit_button("Start Building Model", icon=":material/start:")
 
-            # Optimize a model
-            # div1_, div2_ = st.columns([1,1])
-            # with div1_:
-            #     start_btn = st.button("Start Building Model", icon=":material/start:")
-            # with div2_:
-                # stop_btn = st.button("Stop", type="primary", icon=":material/block:")
-
+            # Build the model
             if submit_button:
-                stop_btn = st.button("Stop", type="primary", icon=":material/block:")
+                stop_btn = st.button("Stop Building Model", type="primary", icon=":material/block:")
                 with st.spinner(text="Building..."):
                     optimized_models, analyses = build_model(_target=target, _lib=lib, _param_grid=param_grid, _nmr_model=nmr_model, _model_kw=model_kw)
                 st.success("Model has been built and cached!")
 
-        
-        
     # Now present the analysis / results
