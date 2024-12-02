@@ -107,8 +107,8 @@ if uploaded_file is not None:
 
     tab1_, tab2_ = st.tabs(["Configure Model", "Analyze Results"]) 
     with tab1_:
-        st.header('Configure Model')
-        
+        st.subheader('Configure Model')
+
         col1_, col2_ = st.columns(2)
         
         with col1_:
@@ -169,7 +169,6 @@ if uploaded_file is not None:
         optimized_models = [pickle.load(open("streamlit/example_model.pkl", 'rb'))] # TEMP
         analyses = [pickle.load(open("streamlit/example_analysis.pkl", 'rb'))] # TEMP
 
-        st.header('Analyze Results')
         if len(optimized_models) > 0:
             st.subheader('Observe how well the model fits the original spectrum.')
 
