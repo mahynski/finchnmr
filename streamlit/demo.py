@@ -182,9 +182,8 @@ if uploaded_file is not None:
                     key='compare_orig',
                 )
                 st.plotly_chart(
-                    target.plot(absolute_values=True, backend='plotly', cmap=cmap_option3),
+                    target.plot(absolute_values=True, backend='plotly', cmap=cmap_option3, title='Original Spectrum'),
                     key='compare_orig_plot',
-                    title='Original Spectrum'
                 )
 
             with col4_:
@@ -195,7 +194,7 @@ if uploaded_file is not None:
                     key='compare_recon'
                 )
                 st.plotly_chart(
-                    model_.reconstruct().plot(absolute_values=True, backend='plotly', cmap=cmap_option4),
+                    model_.reconstruct().plot(absolute_values=True, backend='plotly', cmap=cmap_option4, title='Model Reconstruction'),
                     key='compare_recon_plot'
                 )
 
@@ -207,6 +206,6 @@ if uploaded_file is not None:
                     key='compare_resid'
                 )
                 st.plotly_chart(
-                    analysis_.build_residual().plot(absolute_values=True, backend='plotly', cmap=cmap_option5),
+                    analysis_.build_residual().plot(absolute_values=True, backend='plotly', cmap=cmap_option5, title='Residual'),
                     key='compare_resid_plot'
                 )
