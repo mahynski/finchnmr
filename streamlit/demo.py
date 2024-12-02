@@ -37,7 +37,7 @@ def build_library():
     lib = finchnmr.library.Library(substances)
     return lib
 
-@st.cache_data
+# @st.cache_data
 def build_model(_target, _lib, _param_grid, _model_name, _model_kw):
     """Build lasso model for target."""
     if _model_name.lower() == "lasso":
@@ -48,7 +48,7 @@ def build_model(_target, _lib, _param_grid, _model_name, _model_kw):
     optimized_models, analyses = finchnmr.model.optimize_models(
         targets=[_target],
         nmr_library=_lib,
-        nmr_model=finchnmr.model.LASSO, #nmr_model,
+        nmr_model=nmr_model,
         param_grid=_param_grid, 
         model_kw=_model_kw, 
     )
