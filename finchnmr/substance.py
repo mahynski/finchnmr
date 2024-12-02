@@ -402,7 +402,7 @@ class Substance:
         cmap="RdBu",
         absolute_values=False,
         backend: str = "mpl",
-        title: Union[str, None] = None
+        title: Union[str, None] = None,
     ):
         """
         Plot a single HSQC NMR spectrum.
@@ -481,7 +481,9 @@ class Substance:
             )
             image_plt.update_xaxes(autorange="reversed")
             image_plt.update_layout(xaxis_title=r"$\omega_2-^1{\rm H~(ppm)}$")
-            image_plt.update_layout(yaxis_title=r"$\omega_1-^{13}{\rm C~(ppm)}$")
+            image_plt.update_layout(
+                yaxis_title=r"$\omega_1-^{13}{\rm C~(ppm)}$"
+            )
             image_plt.update_layout(coloraxis_colorbar=dict(title="Intensity"))
             image_plt.update_traces(
                 hovertemplate="x: %{x}<br>y: %{y}<br>Intensity: %{z}"

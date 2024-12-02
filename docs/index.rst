@@ -30,7 +30,7 @@ License Information
 * See `LICENSE.md <https://github.com/mahynski/finchnmr/blob/main/LICENSE.md>`_ for more information.
 
 * Any mention of commercial products is for information only; it does not imply recommendation or endorsement by `NIST <https://www.nist.gov/>`_.
-  
+
 .. toctree::
    :maxdepth: 2
    :caption: Tutorials
