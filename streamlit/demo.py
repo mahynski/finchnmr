@@ -114,13 +114,14 @@ if uploaded_file is not None:
 
     with col2_:
         # Load reference library from HF
-        with st.spinner(text="Building HSQC Library..."):
+        with st.spinner(text="Building HSQC Library (this can take a minute the first time)..."):
             lib = build_library()
-        st.success("Library has been built!")
+        st.success("Library has been built and cached!")
     
         # Optimize a model
-        with st.spinner(text="Building Lasso model..."):
-            optimized_models, analyses = build_model(target, lib)
-        st.success("Model finished!")
+        if st.button("Build Lasso Model", type='primary'):
+            with st.spinner(text="Building Lasso model..."):
+                optimized_models, analyses = build_model(target, lib)
+            st.success("Model finished!")
         
     # Now present the analysis / results
