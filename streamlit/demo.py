@@ -119,9 +119,11 @@ if uploaded_file is not None:
         st.success("Library has been built and cached!")
     
         # Optimize a model
-        if st.button("Build Lasso Model", type='primary'):
+        if st.button("Build Lasso Model"):
             with st.spinner(text="Building Lasso model..."):
                 optimized_models, analyses = build_model(target, lib)
             st.success("Model finished!")
+
+        st.button("Reset/Stop", type="primary")
         
     # Now present the analysis / results
