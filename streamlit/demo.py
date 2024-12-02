@@ -121,9 +121,9 @@ if uploaded_file is not None:
         # Optimize a model
         div1_, div2_ = st.columns([1,1])
         with div1_:
-            start_btn = st.button("Build Model")
+            start_btn = st.button("Start Building Model")
         with div2_:
-            stop_btn = st.button("Stop", type="primary")
+            stop_btn = st.button("Stop", type="primary", icon=":material/block:")
 
         if start_btn:
             with st.spinner(text="Building..."):
