@@ -52,9 +52,10 @@ def build_model(_target, _lib):
 # --------------------------------- SIDEBAR ----------------------------------
 st.set_page_config(layout="wide")
 st.header("Analyze an HSQC NMR Spectra with FINCHnmr")
+st.logo("docs/_static/logo_small.png")
 
 with st.sidebar:
-    st.logo("docs/_static/logo_small.png")
+    st.image("docs/_static/logo_small.png")
     st.markdown('''
     ## About this application    
     :heavy_check_mark: This tool is intended to demonstrate the use of [finchnmr](https://github.com/mahynski/finchnmr) to characterize the composition of mixture of compounds.
