@@ -211,6 +211,6 @@ if uploaded_file is not None:
                 )
 
             st.pyplot(
-                analysis_.plot_top_spectra(k=6, plot_width=3),
+                analysis_.plot_top_spectra(k=6, plot_width=3).get_figure(),
                 use_container_width=True
             )
