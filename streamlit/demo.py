@@ -39,13 +39,7 @@ def build_library():
 
 # @st.cache_data
 def build_model(_target, _lib, _param_grid, _nmr_model, _model_kw):
-    """Build lasso model for target."""
-    # _nmr_model = finchnmr.model.LASSO
-    # if _model_name.lower() == "lasso":
-    #     _nmr_model = finchnmr.model.LASSO, # Use a Lasso model to obtain a sparse solution
-    # else:
-    #     raise ValueError(f"Unrecognized model {_model_name}")
-    
+    """Build model for target."""
     optimized_models, analyses = finchnmr.model.optimize_models(
         targets=[_target],
         nmr_library=_lib,
@@ -129,13 +123,14 @@ if uploaded_file is not None:
         model_ = st.selectbox(label="Choose a model", options=["Lasso"], index=0)
 
         if model_:
-            model_name = model_.lower()
+            nmr_model = None
             param_grid = {}
             model_kw = {}
 
             with st.form(key='model_settings'):
                 # Set parameters and model kwargs
                 if model_.lower() == "lasso":
+                    nmr_model = finchnmr.model.LASSO
                     start_alpha_ = st.number_input(label="Smallest alpha (log base)", min_value=-16, max_value=16, value="min", step=1)
                     stop_alpha_ = st.number_input(label="Largest alpha (log base)", min_value=-16, max_value=16, value=0, step=1)
                     n_ = st.slider(label="Number of alpha values in logscale", min_value=1, max_value=100, value=1, step=1)
@@ -154,7 +149,7 @@ if uploaded_file is not None:
 
             if submit_button:
                 with st.spinner(text="Building..."):
-                    optimized_models, analyses = build_model(_target=target, _lib=lib, _param_grid=param_grid, _nmr_model=finchnmr.model.LASSO, _model_kw=model_kw)
+                    optimized_models, analyses = build_model(_target=target, _lib=lib, _param_grid=param_grid, _nmr_model=nmr_model, _model_kw=model_kw)
                 st.success("Model has been built and cached!")
 
         
