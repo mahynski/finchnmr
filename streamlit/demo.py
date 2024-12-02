@@ -179,7 +179,10 @@ if uploaded_file is not None:
                     index=0,
                     key='compare_orig'
                 )
-                st.plotly_chart(target.plot(absolute_values=True, backend='plotly', cmap=cmap_option3))
+                st.plotly_chart(
+                    target.plot(absolute_values=True, backend='plotly', cmap=cmap_option3),
+                    key='compare_orig_plot'
+                )
 
             with col4_:
                 cmap_option4 = st.selectbox(
@@ -188,12 +191,19 @@ if uploaded_file is not None:
                     index=0,
                     key='compare_recon'
                 )
-                st.plotly_chart(model_.reconstruct().plot(absolute_values=True, backend='plotly', cmap=cmap_option4))
+                st.plotly_chart(
+                    model_.reconstruct().plot(absolute_values=True, backend='plotly', cmap=cmap_option4),
+                    key='compare_recon_plot'
+                )
 
             with col5_:
                 cmap_option5 = st.selectbox(
                     "Colormap",
                     ("Reds", "Blues", "Viridis", "Plasma", "RdBu"),
                     index=0,
+                    key='compare_resid'
                 )
-                st.plotly_chart(analyses[0].build_residual().plot(absolute_values=True, backend='plotly', cmap=cmap_option5))
+                st.plotly_chart(
+                    analyses[0].build_residual().plot(absolute_values=True, backend='plotly', cmap=cmap_option5),
+                    key='compare_resid_plot'
+                )
