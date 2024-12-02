@@ -211,12 +211,13 @@ if uploaded_file is not None:
                     key='compare_resid_plot'
                 )
 
+            # Plot most important spectra
+            max_n_ = len(analysis_._model.importances())
+            default_n_ = np.min([10, max_n_])
             with col6_:
-                # Plot most important spectra
-                max_n_ = len(analysis_._model.importances())
                 n_imp_ = st.slider(
                     label='Visualize the most important N spectra in the library',
-                    value=np.min([10, max_n_]), 
+                    value=default_n_, 
                     min_value=1, 
                     max_value=max_n_,
                     step=1
@@ -225,3 +226,19 @@ if uploaded_file is not None:
                     analysis_.plot_top_importances(k=n_imp_, by_name=True).get_figure(),
                     use_container_width=True
                 )
+
+            st.divider()
+
+            # Now plot the important spectra themselves
+            top_substances, top_importances = analysis_.get_top_substances(k=n_imp_)
+            n_cols_ = 3
+            n_rows_ = int(np.ceil(n_imp_ / n_cols_))
+            ctr = 0
+            for row_idx in range(n_rows_):
+                for col_idx in range(n_cols_):
+                    if ctr < n_imp_:
+                        st.plotly_chart(
+                            top_substances[ctr].plot(absolute_values=True, backend='plotly',)
+                        )  
+                    ctr += 1
+

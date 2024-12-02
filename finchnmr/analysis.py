@@ -123,12 +123,46 @@ class Analysis:
         """
         setattr(self, "_model", model)
 
+    def get_top_substances(
+            self,
+            k: int = 5
+    ) -> tuple[list["substance.Substance"], list[float]]:
+        """
+        Retrieve the most important substances to the model.
+        
+        Parameters
+        ----------
+        k : int, optional(default=5)
+            Number of most important spectra to retrieve.
+        
+        Returns
+        -------
+        top_substances : list(Substance)
+            The most important substances, sorted from highest to lowest by the absolute value of their importance.
+
+        top_importances : list(float)
+            Importance of each substance, sorted from highest to lowest by the absolute value of their importance.
+        """
+        top_substances = []
+        top_importances = []
+        for i, (idx_, importances_) in enumerate(
+            sorted(
+                list(enumerate(self._model.importances())),
+                key=lambda x: np.abs(x[1]),
+                reverse=True,
+            )[:k]
+        ):
+            top_substances.append(self._model._nmr_library.substance_by_index(idx_))
+            top_importances.append(importances_)
+        
+        return top_substances, top_importances
+
     def plot_top_spectra(
         self,
         k: int = 5,
         plot_width: int = 3,
         figsize: Union[tuple[int, int], None] = (10, 5),
-    ) -> NDArray:
+    ):
         """
         Plot the HSQC NMR spectra that are the most importance to the model.
 
@@ -146,29 +180,24 @@ class Analysis:
         Returns
         -------
         axes : ndarray(matplotlib.pyplot.Axes, ndim=1)
-            Flattened array of axes on which the spectra are plotted.
+            Flattened array of axes on which the top HSQC NMR spectra are plotted.
         """
         if k == -1:
             k = len(self._model.importances())
 
         plot_depth = int(np.ceil(k / plot_width))
+
         fig, axes_ = plt.subplots(
             nrows=plot_depth, ncols=plot_width, figsize=figsize
         )
         axes = axes_.flatten()
 
         # Plot the NMR spectra
-        for i, (idx_, importances_) in enumerate(
-            sorted(
-                list(enumerate(self._model.importances())),
-                key=lambda x: np.abs(x[1]),
-                reverse=True,
-            )[:k]
-        ):
-            s_ = self._model._nmr_library.substance_by_index(idx_)
+        top_substances, top_importances = self.get_top_substances(k=k)
+        for s_, importance_ in zip(top_substances, top_importances):
             s_.plot(ax=axes[i])
             axes[i].set_title(
-                s_.name + "\nI = {}".format("%.4f" % importances_)
+                s_.name + "\nI = {}".format("%.4f" % importance_)
             )
 
         # Trim of extra subplots
