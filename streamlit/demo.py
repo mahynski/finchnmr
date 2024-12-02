@@ -238,7 +238,6 @@ if uploaded_file is not None:
                 for col_, col_idx in zip(st.columns(n_cols_), range(n_cols_)):
                     with col_:
                         if ctr < n_imp_:
-                            with 
                             st.plotly_chart(
                                 top_substances[ctr].plot(absolute_values=True, backend='plotly',)
                             )  
