@@ -146,7 +146,7 @@ if uploaded_file is not None:
                         random_state_ = st.number_input(label="RNG seed", min_value=None, max_value=None, value=42)
                     else:
                         random_state_ = 42
-                    tol_ = st.number_input(label="Convergence tolerance", min_value=None, max_value=None, value=0.0001)
+                    tol_ = st.number_input(label="Convergence tolerance", min_value=None, max_value=None, value=0.0001, format="%0.4f")
                     model_kw = {'max_iter':int(max_iter_), 'selection':selection_, 'random_state':random_state_, 'tol':tol_} 
 
                 submit_button = st.form_submit_button("Start Building Model", icon=":material/start:")
