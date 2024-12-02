@@ -120,7 +120,7 @@ if uploaded_file is not None:
 
         with col2_:
             # Load reference library from HF
-            with st.spinner(text="Building HSQC Library from [HF](https://huggingface.co/datasets/mahynski/bmrb-hsqc-nmr-1H13C) (this can take a minute the first time)..."):
+            with st.spinner(text="Building HSQC Library from [HuggingFace](https://huggingface.co/datasets/mahynski/bmrb-hsqc-nmr-1H13C) (this can take a minute the first time)..."):
                 lib = build_library()
             st.success("Library has been built and cached!")
 
@@ -235,10 +235,12 @@ if uploaded_file is not None:
             n_rows_ = int(np.ceil(n_imp_ / n_cols_))
             ctr = 0
             for row_idx in range(n_rows_):
-                for col_idx in range(n_cols_):
-                    if ctr < n_imp_:
-                        st.plotly_chart(
-                            top_substances[ctr].plot(absolute_values=True, backend='plotly',)
-                        )  
-                    ctr += 1
+                for col_, col_idx in zip(st.columns(n_cols_), range(n_cols_)):
+                    with col_:
+                        if ctr < n_imp_:
+                            with 
+                            st.plotly_chart(
+                                top_substances[ctr].plot(absolute_values=True, backend='plotly',)
+                            )  
+                        ctr += 1
 
