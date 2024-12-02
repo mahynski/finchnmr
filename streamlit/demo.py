@@ -138,15 +138,14 @@ if uploaded_file is not None:
 
                         # Set of alphas to check
                         st.write("Hyperparameters")
-                        st.divider()
                         start_alpha_ = st.number_input(label="Smallest alpha (log base)", min_value=-16, max_value=16, value="min", step=1)
                         stop_alpha_ = st.number_input(label="Largest alpha (log base)", min_value=-16, max_value=16, value=0, step=1)
                         n_ = st.slider(label="Number of alpha values in logscale", min_value=1, max_value=100, value=1, step=1)
                         param_grid = {'alpha': np.logspace(start_alpha_, stop_alpha_, int(n_))} # Select a range of alpha values to examine sparsity
 
                         # Lasso configuration
-                        st.write("Model Configuration")
                         st.divider()
+                        st.write("Model Configuration")
                         max_iter_ = st.number_input(label="Max number of iterations to converge, see [Lasso documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html)", min_value=1, max_value=100000, value=1000, step=1)
                         selection_ = st.selectbox(label='Selection scheme, see [Lasso documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html)', options=['selection', 'random'], index=0)
                         tol_ = st.number_input(label="Convergence tolerance, see [Lasso documentation](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Lasso.html)", min_value=None, max_value=None, value=0.0001, format="%0.4f", step=0.0001)
