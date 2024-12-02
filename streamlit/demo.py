@@ -72,6 +72,8 @@ with st.sidebar:
 with st.popover("Example Upload Directory"):
     st.text("example/\n├── acqu\n├── acqu2\n├── acqu2s\n├── acqus\n├── audita.txt\n├── cpdprg2\n├── format.temp\n├── fq1list\n├── pdata\n│       └── 1\n│                  ├── 2ii\n│                  ├── 2ir\n│                  ├── 2ri\n│                  ├── 2rr\n│                  ├── assocs\n│                  ├── auditp.txt\n│                  ├── clevels\n│                  ├── curdat2\n│                  ├── outd\n│                  ├── proc\n│                  ├── proc2\n│                  ├── proc2s\n│                  ├── procs\n│                  ├── thumb.png\n│                  └── title\n├── prosol_History\n├── pulseprogram\n├── scon2\n├── ser\n├── specpar\n├── spnam14\n├── spnam3\n├── spnam31\n├── spnam7\n├── uxnmr.info\n└── uxnmr.par\n")
 
+st.write(os.listdir('./'))
+
 # ----------------------------------- MAIN -----------------------------------
 uploaded_file = st.file_uploader(
     label="Upload a directory output by a Bruker HSQC NMR instrument to start. This should be provided as .zip file. Refer to the dropdown above for an example of the directory structure which should be provided, e.g., as example.zip.",
@@ -164,12 +166,13 @@ if uploaded_file is not None:
     # Now present the analysis / results
     with tab2_:
         import pickle
-        optimized_models = [pickle.load(open("streamlit/example_model.pkl", 'rb'))] # TEMP
+        optimized_models = [pickle.load(open("example_model.pkl", 'rb'))] # TEMP
 
         if len(optimized_models) > 0:
             model_ = optimized_models[0] # We only fit one model
 
-            col3_, col4_ = st.columns(2)
+            # Plot original vs. reconstructed and residual
+            col3_, col4_, col5_ = st.columns(3)
             with col3_:
                 # Plot the substance with plotly
                 cmap_option3 = st.selectbox(
@@ -186,3 +189,11 @@ if uploaded_file is not None:
                     index=0,
                 )
                 st.plotly_chart(model_.reconstruct().plot(absolute_values=True, backend='plotly', cmap=cmap_option4))
+
+            with col5_:
+                cmap_option5 = st.selectbox(
+                    "Colormap",
+                    ("Reds", "Blues", "Viridis", "Plasma", "RdBu"),
+                    index=0,
+                )
+                st.plotly_chart(analyses[0].build_residual().plot(absolute_values=True, backend='plotly', cmap=cmap_option5))
