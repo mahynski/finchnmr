@@ -107,7 +107,8 @@ def optimize_models(
                 estimator_ = build_fitted_model_(
                     model_kw, param_set, nmr_library, target
                 )
-            except:
+            except Exception as e:
+                print(e)
                 pass  # Do not score this model
             else:
                 scores.append(estimator_.score())
