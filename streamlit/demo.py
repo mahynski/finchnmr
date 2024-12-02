@@ -238,14 +238,14 @@ if uploaded_file is not None:
 
     # Now present the analysis / results
     with tab2_:
-        import pickle
+        # import pickle
 
-        optimized_models = [
-            pickle.load(open("streamlit/example_model.pkl", "rb"))
-        ]  # TEMP
-        analyses = [
-            pickle.load(open("streamlit/example_analysis.pkl", "rb"))
-        ]  # TEMP
+        # optimized_models = [
+        #     pickle.load(open("streamlit/example_model.pkl", "rb"))
+        # ]  # TEMP
+        # analyses = [
+        #     pickle.load(open("streamlit/example_analysis.pkl", "rb"))
+        # ]  # TEMP
 
         if len(optimized_models) > 0:
             st.subheader(
