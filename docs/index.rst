@@ -13,8 +13,6 @@ FINCHnmr documentation
    :target: https://codecov.io/gh/mahynski/finchnmr
 .. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
    :target: https://github.com/pre-commit/pre-commit
-.. image:: https://zenodo.org/badge/331207062.svg
-   :target: https://zenodo.org/badge/latestdoi/331207062
 
 ----
 
