@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "Please cite this repository as indicated below."
+authors:
+  - family-names: Mahynski
+    given-names: Nathan
+    orcid: https://orcid.org/0000-0002-0008-8749
+  - family-names: Sheen
+    given-name: David
+    orcid: https://orcid.org/0000-0003-1958-1848
+title: "finchnmr"
+version: 0.0.0-b1
+date-released: 2014-12-03
