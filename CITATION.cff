@@ -8,6 +8,5 @@ authors:
     given-name: David
     orcid: https://orcid.org/0000-0003-1958-1848
 title: "finchnmr"
-version: v0.0.0
-doi: 10.1234/zenodo.12345678
-date-released: YYYY-MM-DD
+version: 0.0.0-b1
+date-released: 2014-12-03
