@@ -2,8 +2,7 @@
 [![Documentation Status](https://readthedocs.org/projects/finchnmr/badge/?version=latest)](https://finchnmr.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/github/mahynski/finchnmr/graph/badge.svg?token=DsrQIbklpB)](https://codecov.io/github/mahynski/finchnmr)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
-[![DOI](https://zenodo.org/badge/331207062.svg)](https://zenodo.org/badge/latestdoi/331207062)
-<!--[![DOI](https://zenodo.org/badge/{github_id}.svg)](https://zenodo.org/badge/latestdoi/{github_id})-->
+<!--[![DOI](https://zenodo.org/badge/331207062.svg)](https://zenodo.org/badge/latestdoi/331207062)-->
 
 <!--
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
