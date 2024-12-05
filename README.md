@@ -45,7 +45,7 @@ Documentation
 
 Documentation is hosted at [https://finchnmr.readthedocs.io/](https://finchnmr.readthedocs.io/) via [readthedocs](https://about.readthedocs.com/).
 
-The logo was generated using Google Gemini with the prompt "Design a logo involving a finch and NMR" on Nov. 9, 2024.
+The logo was generated using Google Gemini (Imagen 3) with the prompt "Design a logo involving a finch and NMR" on Nov. 9, 2024.
 
 License Information
 ===
