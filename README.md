@@ -40,6 +40,13 @@ $ pip install .
 $ python -m pytest # Optional unittests
 ~~~
 
+To install this into a Jupyter kernel:
+
+~~~bash
+$ conda activate finchnmr-env
+$ python -m ipykernel install --user --name finchnmr-kernel --display-name "finchnmr-kernel"
+~~~
+
 Documentation
 ===
 
