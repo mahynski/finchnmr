@@ -331,7 +331,7 @@ typing-extensions==4.12.2
     #   pydata-sphinx-theme
 tzdata==2024.2
     # via pandas
-urllib3==2.2.3
+urllib3==2.7.0
     # via requests
 virtualenv==20.28.0
     # via pre-commit
