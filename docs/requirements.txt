@@ -215,10 +215,11 @@ pygments==2.18.0
     #   ipython
     #   nbconvert
     #   pydata-sphinx-theme
+    #   pytest
     #   sphinx
 pyparsing==3.2.0
     # via matplotlib
-pytest==8.3.3
+pytest==9.0.3
     # via -r requirements.in
 python-dateutil==2.9.0.post0
     # via
