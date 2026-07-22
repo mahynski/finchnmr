@@ -84,6 +84,7 @@ jedi==0.19.2
     # via ipython
 jinja2==3.1.6
     # via
+    #   -r requirements.in
     #   nbconvert
     #   nbsphinx
     #   sphinx
@@ -325,16 +326,17 @@ traitlets==5.14.3
     #   nbconvert
     #   nbformat
     #   nbsphinx
-typing-extensions==4.12.2
+typing-extensions==4.16.0
     # via
     #   mistune
     #   mypy
     #   pydata-sphinx-theme
+    #   virtualenv
 tzdata==2024.2
     # via pandas
 urllib3==2.7.0
     # via requests
-virtualenv==20.28.0
+virtualenv==20.36.1
     # via pre-commit
 wcwidth==0.2.13
     # via prompt-toolkit
