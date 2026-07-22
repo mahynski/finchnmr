@@ -23,7 +23,7 @@ beautifulsoup4==4.12.3
     # via
     #   nbconvert
     #   pydata-sphinx-theme
-bleach==6.2.0
+bleach[css]==6.2.0
     # via nbconvert
 certifi==2024.8.30
     # via requests
@@ -130,7 +130,7 @@ mypy-extensions==1.0.0
     # via mypy
 nbclient==0.10.0
     # via nbconvert
-nbconvert==7.16.4
+nbconvert==7.17.1
     # via nbsphinx
 nbformat==5.10.4
     # via
@@ -301,7 +301,7 @@ threadpoolctl==3.5.0
 tifffile==2024.9.20
     # via scikit-image
 tinycss2==1.4.0
-    # via nbconvert
+    # via bleach
 tomli==2.1.0
     # via
     #   mypy
