@@ -62,7 +62,7 @@ fastjsonschema==2.20.0
     # via nbformat
 filelock==3.16.1
     # via virtualenv
-fonttools==4.55.0
+fonttools==4.60.2
     # via matplotlib
 identify==2.6.3
     # via pre-commit
