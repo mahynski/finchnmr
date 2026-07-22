@@ -14,7 +14,7 @@ scikit-learn
 matplotlib>=3.7.2
 pandas==2.2
 pre-commit==3.3.3
-pytest>=7.4.0
+pytest>=9.0.3
 ipython<=8.21
 ipykernel
 nbformat>=4.2.0
