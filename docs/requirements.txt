@@ -210,7 +210,7 @@ pybtex-docutils==1.0.3
     # via sphinxcontrib-bibtex
 pydata-sphinx-theme==0.16.0
     # via sphinx-book-theme
-pygments==2.18.0
+pygments==2.20.0
     # via
     #   accessible-pygments
     #   ipython
