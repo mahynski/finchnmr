@@ -123,7 +123,7 @@ matplotlib-inline==0.1.7
     # via
     #   ipykernel
     #   ipython
-mistune==3.3.0
+mistune==3.3.3
     # via nbconvert
 mypy==1.13.0
     # via -r requirements.in
