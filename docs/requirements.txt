@@ -60,8 +60,10 @@ executing==2.1.0
     # via stack-data
 fastjsonschema==2.20.0
     # via nbformat
-filelock==3.20.3
-    # via virtualenv
+filelock==3.32.7
+    # via
+    #   python-discovery
+    #   virtualenv
 fonttools==4.60.2
     # via matplotlib
 identify==2.6.3
@@ -227,6 +229,8 @@ python-dateutil==2.9.0.post0
     #   jupyter-client
     #   matplotlib
     #   pandas
+python-discovery==1.6.1
+    # via virtualenv
 pytz==2024.2
     # via pandas
 pyyaml==6.0.2
@@ -308,7 +312,7 @@ tomli==2.1.0
     # via
     #   mypy
     #   pytest
-tornado==6.5.8
+tornado==6.5.9
     # via
     #   ipykernel
     #   jupyter-client
@@ -336,7 +340,7 @@ tzdata==2024.2
     # via pandas
 urllib3==2.8.0
     # via requests
-virtualenv==20.36.1
+virtualenv==21.7.13
     # via pre-commit
 wcwidth==0.2.13
     # via prompt-toolkit
